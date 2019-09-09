@@ -85,8 +85,29 @@ router.get('/my_blood_request', function (req, res, next) {
   });
 });
 
+// 마이페이지 - 등록한 헌혈증 라우터
+router.get('/onlyregistered', function (req, res, next) {
+  Bdcard.findAll({
+    include: [
+      {model: User, required: true},
+    ]
+  }).then(function (bdcards) {
+    var result = {};
+    if (req.user) {
+      Object.assign(result, req.user);
+    }
+    Object.assign(result, { register: false });
+    if (bdcards) {
+      Object.assign(result, { bdcards: bdcards });
+    }
+     res.render('onlyregistered', result);
+  }).catch(function (err) {
+    console.log(err);
+  });
+});
 
-// 헌혈증 기부, 기부요청목록, 기부요청 메인화면    main화면에서 기부하러/받으러 가기 >> 버튼 
+
+// 헌혈증 기부, 기부요청목록, 기부요청 메인화면    main화면에서 기부하러/받으러 가기 >> 버튼
 router.get('/blood_donation_main', function (req, res, next) {
   Reqboard.findAll({
     order: [['reg_date', 'DESC']],
@@ -106,10 +127,10 @@ router.get('/blood_donation_main', function (req, res, next) {
   }).catch(function (err) {
     console.log(err);
   });
-  
+
 });
 
-// 헌혈증 기부요청   main화면에서 기부요청글 올리기 >> 버튼 
+// 헌혈증 기부요청   main화면에서 기부요청글 올리기 >> 버튼
 router.get('/blood_request', function (req, res, next) {
 
   res.render('blood_request_form', req.user);
@@ -162,8 +183,8 @@ router.post('/blood_donation', function (req, res, next) {
   var user_bdcard_count = Number(req.body.user_bdcard_count);
 
   var donater = req.user.user_id;
-  
-  // 기부자 헌혈증 개수 감소, 기부 개수 증가 
+
+  // 기부자 헌혈증 개수 감소, 기부 개수 증가
   req.user.bdcard_count -= donate_count;
   user_bdcard_count -= donate_count;
   req.user.dona_count += donate_count;
@@ -195,7 +216,7 @@ router.post('/blood_donation', function (req, res, next) {
       owner_id: donater
     }
   }).then(function (bdcards) {
-    
+
     bdcards.forEach(function (element) {
       element.update({
         //dona_date: '2020-20-20',
@@ -229,8 +250,8 @@ router.post('/blood_donation', function (req, res, next) {
   }).then(function(re){
     res.send(Object.assign(req.user, {
       user_bdcard_count: user_bdcard_count,
-      donated_count: donated_count_update, 
-      need_more: need_more, 
+      donated_count: donated_count_update,
+      need_more: need_more,
       is_finished: is_finished
     }));
   }).catch(function(err){

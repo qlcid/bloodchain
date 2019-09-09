@@ -38,7 +38,7 @@
 <!-- 회원가입 성공 후 main으로 돌아올 경우 알려주고 url 바꿔줌  -->
 <%if(register == "success"){%>
     <script>
-        alert('회원이 되신 것을 축하드립니다!');    
+        alert('회원이 되신 것을 축하드립니다!');
         location.href='/';
     </script>
 <%}
@@ -82,8 +82,8 @@ if(login == true){%>
                 <p id="register_recommend"></p>
             </div>
         </div>
-        
-      
+
+
 
         <div class="container">
             <!-- Example row of columns -->
@@ -92,6 +92,13 @@ if(login == true){%>
                     <h2>등록</h2>
                     <p>내가 갖고있는 헌혈증을 등록하여 안전하게 영구적으로 보관할 수 있습니다.</p>
                     <p><a id="blood_reg"class="btn btn-success" href="/blood/blood_register" role="button">헌혈증 등록하러 가기 &raquo;</a></p>
+                </div>
+                <hr style="width: 0px; height: 50px; border-right: 0px">
+
+                <div class="col-md-4">
+                    <h2>등록한 헌혈증</h2>
+                    <p>등록한 헌혈증을 확인할 수 있습니다.</p>
+                    <p><a id="blood_reg"class="btn btn-success" href="/blood/onlyregistered" role="button">등록한 헌혈증 확인하러 가기 &raquo;</a></p>
                 </div>
                 <hr style="width: 0px; height: 50px; border-right: 0px">
 
@@ -193,16 +200,16 @@ if(login == true){%>
         <p>&copy; Company 2017-2019</p>
     </footer>
 
- 
+
 
     <%if(!locals.user_id){%>
-        <script>    
+        <script>
            $(function () {
                 $("#blood_reg, #blood_history, #blood_req")
                     .removeAttr('href')
                     .click(function () { alert('회원만 이용할 수 있습니다. 회원가입을 해주세요!') });
-            
-        }) 
+
+        })
         </script>
     <%}%>
 </body>

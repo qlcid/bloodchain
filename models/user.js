@@ -22,7 +22,7 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING(20),
             allowNull: false,
         },
-        nickname: { 
+        nickname: {
             type: DataTypes.STRING(20),
             allowNull: false,
         },
@@ -44,7 +44,7 @@ module.exports = (sequelize, DataTypes) => {
         class: {
             type: DataTypes.STRING(10),
             allowNull: false,
-            defaultValue: '브론즈',
+            defaultValue: 'bronze',
         },
         reg_date: {
             type: DataTypes.DATE,
