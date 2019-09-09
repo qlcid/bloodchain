@@ -14,10 +14,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING(15),
             allowNull: false,
         },
-        blood_bank_name: { 
+        blood_bank_name: {
             type: DataTypes.STRING(50),
             allowNull: false,
-        }, 
+        },
         is_donated: {
             type: DataTypes.BOOLEAN,
             allowNull: false,

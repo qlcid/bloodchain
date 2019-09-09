@@ -34,13 +34,13 @@
     <!-- Custom styles for this template -->
 </head>
 
-<%if(!locals.user_id){%>    
+<%if(!locals.user_id){%>
     <script>
-        location.replace = '/';  
+        location.replace = '/';
     </script>
 <%}%>
 
-<body>  
+<body>
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
         integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
         crossorigin="anonymous"></script>
@@ -145,6 +145,7 @@
                 </div>
             </div>
 
+          
 
             <div class="modal-footer">
                 <a class="btn btn-success" href="/blood/my_blood_request" role="button">내 기부요청 관리</a>
@@ -164,7 +165,7 @@
                 url: '/users/my_blood_request',
                 dataType: 'json',
                 type: 'POST',
-                data: { 
+                data: {
                     id: id,
                     req_user_id: req_user_id,
                     nickname: nickname,
@@ -176,18 +177,18 @@
                 },
                 success: function (data) {
                     alert(donate_count + '개의 헌혈증이 기부되었습니다. 감사합니다!');
-                    
+
                     $('#donationModal').find('#donated_count').text(data.donated_count).css('color', 'red');
                         $('#donationModal').find('#need_more').text(data.need_more).css('color', 'red');
                     $('#bcount' + id).text(data.donated_count + '/' + need_count);
-                    
+
                     $('#' + id).attr('data-need_count', data.need_count);
                     $('#' + id).attr('data-donated_count', data.donated_count);
                     $('#' + id).attr('data-bdcard_count', data.bdcard_count);
 
                     if (data.is_finished) {
                         alert('해당 기부요청글의 기부가 완료되었습니다!');
-                       
+
                     }
                     $('#donationClose').trigger("click");
                     $('#donationClose').bind("click");
@@ -200,8 +201,8 @@
     });
 </script-->
 
-  
-    
+
+
 </body>
 
 </html>
