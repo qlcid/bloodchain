@@ -1,6 +1,8 @@
 var express = require('express');
 var router = express.Router();
 var sequelize = require('sequelize');
+var invokeSDK = require('../fabric/sdk/javascript-sdk/invoke.js');
+//var querySDK = require('../fabric/sdk/javascript-sdk/query.js');
 
 const { User, Bdcard, Reqboard } = require('../models');
 
@@ -46,7 +48,7 @@ router.post('/blood_register_do', function (req, res, next) {
         }, {
           where: { user_id: req.body.owner_id },
         }).then(function(User){
-
+          invokeSDK.invoke('register', [req.body.bnum, req.body.owner_id]);
           res.render('blood_register_form', {register: "success"})
         }).catch(function(err){
           console.log(err);
@@ -73,7 +75,7 @@ router.get('/my_blood_request', function (req, res, next) {
     if (req.user) {
       Object.assign(result, req.user);
     }
-    Object.assign(result, { register: false });
+
     if (reqboards) {
       Object.assign(result, { reqboards: reqboards });
     }
@@ -255,12 +257,33 @@ router.post('/blood_donation', function (req, res, next) {
   }).catch(function(err){
     console.log(Err);
   })
-
-})
-
-// 헌혈증 기부내역 확인    main화면에서 기부내역 확인하러가기 >> 버튼
-router.get('/blood_history', function (req, res, next) {
-  res.render('blood_history', req.user);
+  
 });
+
+
+// 헌혈증 기부내역 확인    main화면에서 기부내역 확인하러가기 >> 버튼 
+// router.get('/blood_history', function (req, res, next) {
+//   Bdcard.findAll({
+//     include: [
+//       {model: User, required: true},
+//     ]
+//   }).then(function (bdcards) {
+//     var result = {};
+
+//     if (req.user) {
+//       Object.assign(result, req.user);
+//     }
+//     Object.assign(result, { register: false });
+//     if (bdcards) {
+//       Object.assign(result, { bdcards: bdcards });
+//     }
+
+//     querySDK.invoke('donated', [req.user_id]);
+//     res.render('blood_history', result);
+//   }).catch(function (err) {
+//     console.log(err);
+//   });
+// });
+
 
 module.exports = router;
