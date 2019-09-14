@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 var sequelize = require('sequelize');
 var invokeSDK = require('../fabric/sdk/javascript-sdk/invoke.js');
-//var querySDK = require('../fabric/sdk/javascript-sdk/query.js');
+var querySDK = require('../fabric/sdk/javascript-sdk/query.js');
 
 const { User, Bdcard, Reqboard } = require('../models');
 
@@ -10,6 +10,9 @@ const { User, Bdcard, Reqboard } = require('../models');
 router.get('/blood_register', function (req, res, next) {
     if(req.user)
       res.render('blood_register_form', Object.assign(req.user, { register: null }));
+    else{
+      res.render('blood_register_form')
+    }
 
 });
 
@@ -26,7 +29,7 @@ router.post('/blood_register_do', function (req, res, next) {
       serial_number = data.serial_number;
       if (req.body.bnum == serial_number) {
         duplicated = true;
-        res.render('blood_register_form', { register: "fail"});
+        res.render('blood_register_form', Object.assign(req.user, { register: "fail" }));
       }
 
     });
@@ -37,9 +40,7 @@ router.post('/blood_register_do', function (req, res, next) {
         serial_number: req.body.bnum,
         blood_date: req.body.bdate,
         blood_dona_type: req.body.btype,
-        blood_bank_name: req.body.bname,
-        owner_id: req.body.owner_id,
-
+        blood_bank_name: req.body.bname
       }).then(function (Bdcard) {
         console.log('success');
         req.user.bdcard_count += 1;
@@ -49,7 +50,7 @@ router.post('/blood_register_do', function (req, res, next) {
           where: { user_id: req.body.owner_id },
         }).then(function(User){
           invokeSDK.invoke('register', [req.body.bnum, req.body.owner_id]);
-          res.render('blood_register_form', {register: "success"})
+          res.render('blood_register_form', Object.assign(req.user, {register: "success"}));
         }).catch(function(err){
           console.log(err);
         })
@@ -67,50 +68,27 @@ router.post('/blood_register_do', function (req, res, next) {
 // 마이페이지 - 내 기부요청 관리 라우터
 router.get('/my_blood_request', function (req, res, next) {
   Reqboard.findAll({
+    order: [['id', 'DESC']],
     include: [
       {model: User, required: true},
-    ]
+    ],
+    where: {req_user_id: req.user.user_id}
   }).then(function (reqboards) {
-    var result = {};
     if (req.user) {
-      Object.assign(result, req.user);
+      res.render('my_blood_request', Object.assign(req.user, {reqboards: reqboards}));
+    }else{
+      res.render('my_blood_request');
     }
-
-    if (reqboards) {
-      Object.assign(result, { reqboards: reqboards });
-    }
-     res.render('my_blood_request', result);
-  }).catch(function (err) {
-    console.log(err);
-  });
-});
-
-// 마이페이지 - 등록한 헌혈증 라우터
-router.get('/onlyregistered', function (req, res, next) {
-  Bdcard.findAll({
-    include: [
-      {model: User, required: true},
-    ]
-  }).then(function (bdcards) {
-    var result = {};
-    if (req.user) {
-      Object.assign(result, req.user);
-    }
-    Object.assign(result, { register: false });
-    if (bdcards) {
-      Object.assign(result, { bdcards: bdcards });
-    }
-     res.render('onlyregistered', result);
   }).catch(function (err) {
     console.log(err);
   });
 });
 
 
-// 헌혈증 기부, 기부요청목록, 기부요청 메인화면    main화면에서 기부하러/받으러 가기 >> 버튼
+// 헌혈증 기부, 기부요청목록, 기부요청 메인화면    main화면에서 기부하러/받으러 가기 >> 버튼 
 router.get('/blood_donation_main', function (req, res, next) {
   Reqboard.findAll({
-    order: [['reg_date', 'DESC']],
+    order: [['id', 'DESC']],
     include: [
       {model: User, required: true},
     ]
@@ -120,20 +98,22 @@ router.get('/blood_donation_main', function (req, res, next) {
       Object.assign(result, req.user);
     }
     Object.assign(result, { register: false });
-    if (reqboards) {
-      Object.assign(result, { reqboards: reqboards });
-    }
-     res.render('blood_donation_main', result);
+    Object.assign(result, { reqboards: reqboards });
+
+    res.render('blood_donation_main', result);
   }).catch(function (err) {
     console.log(err);
   });
-
+  
 });
 
-// 헌혈증 기부요청   main화면에서 기부요청글 올리기 >> 버튼
+// 헌혈증 기부요청   main화면에서 기부요청글 올리기 >> 버튼 
 router.get('/blood_request', function (req, res, next) {
-
-  res.render('blood_request_form', req.user);
+  if(req.user){
+    res.render('blood_request_form', req.user);
+  }else{
+    res.render('blood_request_form');
+  }
 });
 
 // 헌혈증 기부요청 처리
@@ -172,7 +152,7 @@ router.post('/blood_request_do', function (req, res, next) {
 });
 
 //헌혈증 기부 처리
-router.post('/blood_donation', function (req, res, next) {
+router.post('/blood_donation', async function (req, res, next) {
   var donate_count = Number(req.body.donate_count);
   var donated_count = Number(req.body.donated_count);
   var need_count = Number(req.body.need_count);
@@ -183,13 +163,27 @@ router.post('/blood_donation', function (req, res, next) {
   var user_bdcard_count = Number(req.body.user_bdcard_count);
 
   var donater = req.user.user_id;
+  
+  // bc 기부처리 (헌혈증 소유자, 기부여부, 기부날짜 등 업데이트)
+  var serials = await querySDK.query('querySerialsForDonate', [donate_count, donater]);
+  serials.forEach((serial) => {
+    invokeSDK.invoke('donate', [serial, req_user_id, used_place]);
+  });
 
-  // 기부자 헌혈증 개수 감소, 기부 개수 증가
+  await Bdcard.update({
+    req_id: id
+  },{
+    where: {serial_number: serials}
+  }).catch(function(err){
+    console.log(err);
+  })
+
+  // 기부자 헌혈증 개수 감소, 기부 개수 증가 
   req.user.bdcard_count -= donate_count;
   user_bdcard_count -= donate_count;
   req.user.dona_count += donate_count;
 
-  User.update({
+  await User.update({
     bdcard_count: user_bdcard_count,
     dona_count: req.user.dona_count
   },{
@@ -199,91 +193,91 @@ router.post('/blood_donation', function (req, res, next) {
   })
 
   // 기부 요청자 헌혈증 개수 증가
-  User.update({
+  await User.update({
     donated_bdcard_count: req_donated_bdcard_count + donate_count
   },{
       where: { user_id: req_user_id }
   }).catch(function (err) {
     console.log(err);
   })
-
-  // 가장 오래된 헌혈증 순으로 기부 개수만큼 가져와서 소유자, 기부날짜, 사용될 병원, 기부자 등 값들 update (기부 수행)
-  Bdcard.findAll({
-    order: [['reg_date', 'ASC']],
-    limit: donate_count,
-    where: {
-      is_donated: false,
-      owner_id: donater
-    }
-  }).then(function (bdcards) {
-
-    bdcards.forEach(function (element) {
-      element.update({
-        //dona_date: '2020-20-20',
-        is_donated: true,
-        used_place: used_place,
-        donater: donater,
-        donated_req_id: id,
-        owner_id: req_user_id,
-      }, {
-          where: { serial_number: element.serial_number},
-      }).catch(function (err) {
-        console.log(err);
-      })
-    })
-  }).catch(function (err) {
-    console.log(err);
-  });
-
+  
   // 기부요청의 기부 개수 상태 업데이트
   var donated_count_update = donate_count + donated_count;
   var need_more = need_count - donated_count_update;
+
   if(need_count == donated_count_update)
     var is_finished = true;
   else
     var is_finished = false;
-  Reqboard.update({
+
+  await Reqboard.update({
     donated_count: donated_count_update,
     is_finished: is_finished,
   },{
     where: {id: id},
-  }).then(function(re){
-    res.send(Object.assign(req.user, {
-      user_bdcard_count: user_bdcard_count,
-      donated_count: donated_count_update,
-      need_more: need_more,
-      is_finished: is_finished
-    }));
   }).catch(function(err){
     console.log(Err);
   })
+
+  res.send(Object.assign(req.user, {
+    user_bdcard_count: user_bdcard_count.toString(),
+    donated_count: donated_count_update.toString(), 
+    need_more: need_more.toString(),
+    req_donated_bdcard_count: (req_donated_bdcard_count + donate_count).toString(),
+    is_finished: is_finished
+  }));
+  
   
 });
 
+// 헌혈증 사용 처리
+router.post('/blood_use', async function (req, res, next) {
+  
+  // id에 해당하는 요청글에 기부된 헌혈증들 가져옴
+  var bdcards = await Bdcard.findAll({
+    where:{req_id: Number(req.body.id)}
+  })
+  
+  // 가져온 헌헐증 invoke로 사용처리(원장의 상태db 업데이트)
+  bdcards.forEach((bdcard) => {
+    console.log(bdcard.serial_number);
+    invokeSDK.invoke('use', [bdcard.serial_number.toString()]);
+  });
+
+  // 요청글 사용 플래그
+  await Reqboard.update({
+    is_all_used: true
+  },{
+    where:{id: Number(req.body.id)}
+  })
+
+  
+  res.send(req.user);
+});
 
 // 헌혈증 기부내역 확인    main화면에서 기부내역 확인하러가기 >> 버튼 
-// router.get('/blood_history', function (req, res, next) {
-//   Bdcard.findAll({
-//     include: [
-//       {model: User, required: true},
-//     ]
-//   }).then(function (bdcards) {
-//     var result = {};
+router.get('/blood_history', function (req, res, next) {
+  Bdcard.findAll({
+    include: [
+      {model: User, required: true},
+    ]
+  }).then(function (bdcards) {
+    var result = {};
 
-//     if (req.user) {
-//       Object.assign(result, req.user);
-//     }
-//     Object.assign(result, { register: false });
-//     if (bdcards) {
-//       Object.assign(result, { bdcards: bdcards });
-//     }
+    if (req.user) {
+      Object.assign(result, req.user);
+    }
+    Object.assign(result, { register: false });
+    if (bdcards) {
+      Object.assign(result, { bdcards: bdcards });
+    }
 
-//     querySDK.invoke('donated', [req.user_id]);
-//     res.render('blood_history', result);
-//   }).catch(function (err) {
-//     console.log(err);
-//   });
-// });
+    querySDK.invoke('donated', [req.user_id]);
+    res.render('blood_history', result);
+  }).catch(function (err) {
+    console.log(err);
+  });
+});
 
 
 module.exports = router;
