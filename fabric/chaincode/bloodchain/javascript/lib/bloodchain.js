@@ -1,7 +1,3 @@
-/*
- * SPDX-License-Identifier: Apache-2.0
- */
-
 'use strict';
 
 const { Contract } = require('fabric-contract-api');
@@ -12,46 +8,64 @@ class BloodChain extends Contract {
     async initLedger(ctx) {
         console.info('============= START : Initialize Ledger ===========');
 
-        // 초기화 데이터 넣어놓은 거~ z
+        // 초기화 데이터
+        // const bloodCards = [
+        //     {
+        //         owner: 'wocjf8888',
+        //         reg_date: new Date().toLocaleDateString(),
+        //         is_donated: false,
+        //         donater: null,
+        //         dona_date: null,
+        //         is_used: false,
+        //         used_place: null,
+        //         used_date: null
+        //     },
+        //     {
+        //         owner: 'jaecheol1234',
+        //         reg_date: new Date().toLocaleDateString(),
+        //         is_donated: false,
+        //         donater: null,
+        //         dona_date: null,
+        //         is_used: false,
+        //         used_place: null,
+        //         used_date: null
+        //     },
+        //     {
+        //         owner: 'ys97',
+        //         reg_date: new Date().toLocaleDateString(),
+        //         is_donated: true,
+        //         donater: null,
+        //         dona_date: null,
+        //         is_used: false,
+        //         used_place: null,
+        //         used_date: null
+        //     },
+        // ];
+
+        // for (let i = 0; i < bloodCards.length; i++) {
+        //     bloodCards[i].docType = 'bloodCard';
+        //     await ctx.stub.putState('BLOODCARD' + i, Buffer.from(JSON.stringify(bloodCards[i])));
+        //     console.info('Added <--> ', bloodCards[i]);
+        // }
+
         const bloodCards = [
             {
-                owner: 'wocjf8888',
+                owner: '1',
                 reg_date: new Date().toLocaleDateString(),
                 is_donated: false,
                 donater: null,
                 dona_date: null,
                 is_used: false,
                 used_place: null,
-                used_date: null
-            },
-            {
-                owner: 'jaecheol1234',
-                reg_date: new Date().toLocaleDateString(),
-                is_donated: false,
-                donater: null,
-                dona_date: null,
-                is_used: false,
-                used_place: null,
-                used_date: null
-            },
-            {
-                owner: 'ys97',
-                reg_date: new Date().toLocaleDateString(),
-                is_donated: true,
-                donater: null,
-                dona_date: null,
-                is_used: false,
-                used_place: null,
-                used_date: null
-            },
+                used_date: null,
+                docType: 'bloodCard'
+            }
         ];
 
-        for (let i = 0; i < bloodCards.length; i++) {
-            bloodCards[i].docType = 'bloodCard';
-            await ctx.stub.putState('BLOODCARD' + i, Buffer.from(JSON.stringify(bloodCards[i])));
-            console.info('Added <--> ', bloodCards[i]);
+        for (let i = 0; i < 20; i++) {
+            await ctx.stub.putState((i + 1).toString(), Buffer.from(JSON.stringify(bloodCards[0])));
+            console.info('Added <--> ', bloodCards[0]);
         }
-
 
         console.info('============= END : Initialize Ledger ===========');
     }
@@ -189,11 +203,11 @@ class BloodChain extends Contract {
         console.info('============= END : Create bloodCard ===========');
     }
 
-    // 헌혈증 기부(구현 완료) return : x
-    async donate(ctx, donate_count, donater, newOwner, used_place) {
+    // 기부할 헌혈증들의 serial 번호를 쿼리 return : serials[]
+    async querySerialsForDonate(ctx, donate_count, donater) {
         console.info('============= START : donate ===========');
- 
-        const iterator = await ctx.stub.getQueryResult(`{
+
+        const { iterator, metadata }= await ctx.stub.getQueryResultWithPagination(`{
             "selector": {
                 "reg_date": {"$ne": null},
                 "docType": "bloodCard", 
@@ -202,43 +216,63 @@ class BloodChain extends Contract {
             },
             "sort": [
                 {"reg_date": "asc"}
-            ],
-            "limit": ${donate_count}
-        }`);
+            ]
+        }`, Number(donate_count));
+        console.log(metadata);
+
+        var serials = [];
+
         while (true) {
             const res = await iterator.next();
+            if (res.value && res.value.value.toString()) {
+                console.log(res.value.value.toString('utf8'));
 
-            var bloodCard = JSON.parse(res.value.value.toString('utf8'));
-            bloodCard.is_used = true;
-            bloodCard.owner = newOwner;
-            bloodCard.is_donated = true;
-            bloodCard.donater = donater;
-            bloodCard.dona_date = new Date().toLocaleDateString();
-            bloodCard.used_place = used_place;
-
-            await ctx.stub.putState(res.value.key, Buffer.from(JSON.stringify(bloodCard)));
-
+                const serial = res.value.key;
+                
+                serials.push(serial);
+            }
             if (res.done) {
+                await iterator.close();
+                console.log(serials);
                 console.info('============= END : donate ===========');
-                return;
+                return JSON.stringify(serials);
             }
         }
     }
 
-    // 헌혈증 사용(구현 완료) return : x
-    async useCard(ctx, donateRequester){
-        console.log(donateRequester);
-        const iterator = await ctx.stub.getQueryResult(`{ \"selector\": {\"docType\": \"bloodCard\", \"owner\": \"${donateRequester}\"} }`);
-            while (true) {
-                const res = await iterator.next();
+    // getDonatedSerial 로 가져온 serial들 중 serial 하나에 해당하는 헌혈증을 기부처리 한다.
+    async donate(ctx, serial, newOwner, used_place){
+        var value = await ctx.stub.getState(serial);
+        var bloodCard = JSON.parse(value.toString('utf8'));
+        bloodCard.donater = bloodCard.owner;
+        bloodCard.owner = newOwner;
+        bloodCard.is_donated = true;
+        bloodCard.dona_date = new Date().toLocaleDateString();
+        bloodCard.used_place = used_place;
+        await ctx.stub.putState(serial, Buffer.from(JSON.stringify(bloodCard)));
+    }
 
-                var bloodCard = JSON.parse(res.value.value.toString('utf8'));
-                bloodCard.is_used = true;
-                bloodCard.used_date = new Date().toLocaleDateString();
-                await ctx.stub.putState(res.value.key, Buffer.from(JSON.stringify(bloodCard)));
-                if(res.done)
-                    return;
-            }
+    // 헌혈증 사용(구현 완료) return : x
+    async useCard(ctx, serial){
+        var value = await ctx.stub.getState(serial);
+        if (!value || value.length === 0) {
+            throw new Error(`${serial} does not exist`);
+        }
+        var bloodCard = JSON.parse(value.toString('utf8'));
+        bloodCard.is_used = true;
+        bloodCard.used_date = new Date().toLocaleDateString();
+        await ctx.stub.putState(serial, Buffer.from(JSON.stringify(bloodCard)));
+        // const iterator = await ctx.stub.getQueryResult(`{ \"selector\": {\"docType\": \"bloodCard\", \"owner\": \"${donateRequester}\"} }`);
+        // while (true) {
+        //     const res = await iterator.next();
+
+        //     var bloodCard = JSON.parse(res.value.value.toString('utf8'));
+        //     bloodCard.is_used = true;
+        //     bloodCard.used_date = new Date().toLocaleDateString();
+        //     await ctx.stub.putState(res.value.key, Buffer.from(JSON.stringify(bloodCard)));
+        //     if(res.done)
+        //         return;
+        // }
     }
 
 }

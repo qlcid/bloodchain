@@ -36,7 +36,8 @@
 
 <%if(!locals.user_id){%>    
     <script>
-        location.replace = '/';  
+        alert('로그아웃 상태입니다. 메인으로 돌아갑니다.');
+        location.href = '/';  
     </script>
 <%}%>
 

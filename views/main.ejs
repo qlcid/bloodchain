@@ -33,39 +33,35 @@
     </style>
     <!-- Custom styles for this template -->
     <link href="/bootstrap/jumbotron.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"
+    integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+    crossorigin="anonymous"></script>
+<script>window.jQuery || document.write('<script src="/bootstrap/jquery-slim.min.js"><\/script>')</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"
+    integrity="sha384-xrRywqdh3PHs8keKZN+8zzc5TX0GRTLCcmivcbNJWm2rs5C8PRhcEn3czEjhAO9o"
+    crossorigin="anonymous"></script>
 </head>
 
 <!-- 회원가입 성공 후 main으로 돌아올 경우 알려주고 url 바꿔줌  -->
 <%if(register == "success"){%>
     <script>
-        alert('회원이 되신 것을 축하드립니다!');
-        location.href='/';
+        alert('회원이 되신 것을 축하드립니다!');    
+        location.replace='/';
     </script>
-<%}
-<!-- 로그인된 상태로 main 페이지 돌아올 경우 회원가입 추천 문구 -->
-if(logged == false){%>
-    <script>
-        var rr = document.getElementById('register_recommend');
-        rr.innerText = '서비스 이용을 위해 회원가입을 해보세요~';
-        location.href='/';
-    </script>
-<%}
+<%}%>
+
 <!--로그인 성공 후 main으로 render할 경우 url 바꿔줌-->
-if(login == true){%>
+<%if(login == true){%>
     <script>
         location.href='/';
     </script>
 <%}%>
-
+<script>
+    locaion.href='/';
+</script>
 <body>
 
-    <script src="https://code.jquery.com/jquery-3.3.1.min.js"
-        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
-        crossorigin="anonymous"></script>
-    <script>window.jQuery || document.write('<script src="/bootstrap/jquery-slim.min.js"><\/script>')</script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"
-        integrity="sha384-xrRywqdh3PHs8keKZN+8zzc5TX0GRTLCcmivcbNJWm2rs5C8PRhcEn3czEjhAO9o"
-        crossorigin="anonymous"></script>
+   
 
     <!-- 로그인 했을 때와 안했을 때 header 다름 -->
     <%if(locals.user_id){%>
@@ -79,12 +75,12 @@ if(login == true){%>
         <div class="jumbotron">
             <div class="container">
                 <h1 class="display-6">헌혈증 기부하자~</h1>
-                <p id="register_recommend"></p>
+                <%if(logged == false){%>
+                <p id="register_recommend">회원가입을 하시면 서비스를 이용하실 수 있습니다.</p>
+                <%}%>
             </div>
         </div>
-
-
-
+      
         <div class="container">
             <!-- Example row of columns -->
             <div class="row">
@@ -92,13 +88,6 @@ if(login == true){%>
                     <h2>등록</h2>
                     <p>내가 갖고있는 헌혈증을 등록하여 안전하게 영구적으로 보관할 수 있습니다.</p>
                     <p><a id="blood_reg"class="btn btn-success" href="/blood/blood_register" role="button">헌혈증 등록하러 가기 &raquo;</a></p>
-                </div>
-                <hr style="width: 0px; height: 50px; border-right: 0px">
-
-                <div class="col-md-4">
-                    <h2>등록한 헌혈증</h2>
-                    <p>등록한 헌혈증을 확인할 수 있습니다.</p>
-                    <p><a id="blood_reg"class="btn btn-success" href="/blood/onlyregistered" role="button">등록한 헌혈증 확인하러 가기 &raquo;</a></p>
                 </div>
                 <hr style="width: 0px; height: 50px; border-right: 0px">
 
@@ -200,16 +189,16 @@ if(login == true){%>
         <p>&copy; Company 2017-2019</p>
     </footer>
 
-
+ 
 
     <%if(!locals.user_id){%>
-        <script>
+        <script>    
            $(function () {
                 $("#blood_reg, #blood_history, #blood_req")
                     .removeAttr('href')
                     .click(function () { alert('회원만 이용할 수 있습니다. 회원가입을 해주세요!') });
-
-        })
+            
+        }) 
         </script>
     <%}%>
 </body>

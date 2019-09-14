@@ -1,9 +1,5 @@
 'use strict';
-/*
-* Copyright IBM Corp All Rights Reserved
-*
-* SPDX-License-Identifier: Apache-2.0
-*/
+
 /*
  * Chaincode query
  */
@@ -31,9 +27,11 @@ channel.addPeer(peer);
 var store_path = path.join(__dirname, 'hfc-key-store');
 console.log('Store path:'+store_path);
 
-// create the key value store as defined in the fabric-client/config/default.json 'key-value-store' setting
-Fabric_Client.newDefaultKeyValueStore({ path: store_path
-}).then((state_store) => {
+var queryResult;
+
+// query 함수로 묶고 promise, then -> async, await로 변경
+async function query(func, params) {
+	var state_store = await Fabric_Client.newDefaultKeyValueStore({ path: store_path });
 	// assign the store to the fabric client
 	fabric_client.setStateStore(state_store);
 	var crypto_suite = Fabric_Client.newCryptoSuite();
@@ -44,25 +42,16 @@ Fabric_Client.newDefaultKeyValueStore({ path: store_path
 	fabric_client.setCryptoSuite(crypto_suite);
 
 	// get the enrolled user from persistence, this user will sign all requests
-	return fabric_client.getUserContext('user1', true);
-}).then((user_from_store) => {
+	var user_from_store = await fabric_client.getUserContext('user1', true);
+
+
 	if (user_from_store && user_from_store.isEnrolled()) {
 		console.log('Successfully loaded user1 from persistence');
 	} else {
 		throw new Error('Failed to get user1.... run registerUser.js');
 	}
 
-	// node query.js [호출 구분 이름] [함수의 매개변수...]  
-	// ex)
-	// node query.js all
-	// node query.js donated yeseul(사용자 아이디)
-	const process = require('process');
-	var args = process.argv;
-	var func = args[2]; // 무슨 함수 호출할건지 가져옴. 
 	var request;
-
-	console.log(args[3]);
-	
 	switch (func) {
 		case 'all':
 			request = {
@@ -74,41 +63,55 @@ Fabric_Client.newDefaultKeyValueStore({ path: store_path
 			break;
 
 		case 'onlyreg':
-			if (args.length != 4) {
-				console.log('인자 개수 error! 다시입력 ㄱㄱ');
-				break;
-			}
+			// if (args.length != 4) {
+			// 	console.log('인자 개수 error! 다시입력 ㄱㄱ');
+			// 	break;
+			// }
 			request = {
 				//targets : --- letting this default to the peers assigned to the channel
 				chaincodeId: 'bloodchain',
 				fcn: 'queryBloodCardsOnlyReg',
-				args: args[3]
+				args: [params[0]]
 			};
 			break;
 
 		case 'dona':
-			if (args.length != 4) {
-				console.log('인자 개수 error! 다시입력 ㄱㄱ');
-				break;
-			}
+			// if (args.length != 4) {
+			// 	console.log('인자 개수 error! 다시입력 ㄱㄱ');
+			// 	break;
+			// }
 			request = {
 				//targets : --- letting this default to the peers assigned to the channel
 				chaincodeId: 'bloodchain',
 				fcn: 'queryBloodCardsDona',
-				args: args[3]
+				args: [params[0]]
 			};
 			break;
 
 		case 'donated':
-			if (args.length != 4) {
-				console.log('인자 개수 error! 다시입력 ㄱㄱ');
-				break;
-			}
+			// if (args.length != 4) {
+			// 	console.log('인자 개수 error! 다시입력 ㄱㄱ');
+			// 	break;
+			// }
 			request = {
 				//targets : --- letting this default to the peers assigned to the channel
 				chaincodeId: 'bloodchain',
 				fcn: 'queryBloodCardsDonated',
-				args: [args[3]]
+				args: [params[0]]
+			};
+			break;
+
+		case 'querySerialsForDonate':
+			// if (args.length != 5) {
+			// 	console.log('인자 개수 error! 다시입력 ㄱㄱ');
+			// 	break;
+			// }
+			console.log(params)
+			request = {
+				//targets : --- letting this default to the peers assigned to the channel
+				chaincodeId: 'bloodchain',
+				fcn: 'querySerialsForDonate',
+				args: [params[0].toString(), params[1]]
 			};
 			break;
 
@@ -117,21 +120,25 @@ Fabric_Client.newDefaultKeyValueStore({ path: store_path
 	}
 
 	// send the query proposal to the peer
-	return channel.queryByChaincode(request);
-}).then((query_responses) => {
+	var query_responses = await channel.queryByChaincode(request);
+	
+	var queryResult;
+
 	console.log("Query has completed, checking results");
 	// query_responses could have more than one  results if there multiple peers were used as targets
 	if (query_responses && query_responses.length == 1) {
 		if (query_responses[0] instanceof Error) {
 			console.error("error from query = ", query_responses[0]);
 		} else {
-			console.log("Response is ", JSON.parse(query_responses[0].toString()));
-			//return JSON.parse(query_responses[0].toString());
+			queryResult = JSON.parse(query_responses[0].toString());
+			console.log("Response is ", queryResult);
+			return new Promise(function(resolve, reject){
+				resolve(queryResult);
+			});
 		}
 	} else {
 		console.log("No payloads were returned from query");
 	}
-}).catch((err) => {
-	console.error('Failed to query successfully :: ' + err);
-});
-
+}
+	
+module.exports.query = query;
