@@ -1,9 +1,5 @@
 'use strict';
-/*
-* Copyright IBM Corp All Rights Reserved
-*
-* SPDX-License-Identifier: Apache-2.0
-*/
+
 /*
  * Chaincode Invoke
  */
@@ -23,35 +19,43 @@ var org1tlscacert = fs.readFileSync(org1tlscacert_path, 'utf8');
 // node invoke.js donate 2(기부할 헌혈증 개수) wocjf8888(기부자 아이디) jaecheol1234(기부 요청자 아이디, owner가 이걸로 바뀜) 명지병원(사용될 병원)
 // node invoke.js use jaecheol1234(헌혈증 사용할 기부요청자의 아이디)
 
-const process = require('process');
-var args = process.argv;
-var func = args[2]; // 무슨 함수 호출할건지 가져옴.  등록(register) 인지 기부(donate) 인지 등등
+// const process = require('process');
+// var args = process.argv;
+// var func = args[2]; // 무슨 함수 호출할건지 가져옴.  등록(register) 인지 기부(donate) 인지 등등
 
-switch (func) {
-	case 'register':
-		if(args.length != 5){
-			console.log('인자 개수 error! 다시입력 ㄱㄱ');
-			break;
-		}
-		invoke('register', [args[3], args[4]]);
-		break;
-	case 'donate':
-		if(args.length != 7){
-			console.log('인자 개수 error! 다시입력 ㄱㄱ');
-			break;
-		}
-		invoke('donate', [args[3], args[4], args[5], args[6]]);
-		break;
-	case 'use':
-		if(args.length != 4){
-			console.log('인자 개수 error! 다시입력 ㄱㄱ');
-			break;
-		}
-		invoke('use', [args[3]]);
-		break;
-	default:
-		break;
-}
+// switch (func) {
+// 	case 'register':
+// 		if (args.length != 5) {
+// 			console.log('인자 개수 error! 다시입력 ㄱㄱ');
+// 			break;
+// 		}
+// 		invoke('register', [args[3], args[4]]);
+// 		break;
+// 	case 'getSerials':
+// 		if (args.length != 5) {
+// 			console.log('인자 개수 error! 다시입력 ㄱㄱ');
+// 			break;
+// 		}
+// 		invoke('getDonatedSerials', [args[3], args[4]]);
+// 		break;
+// 	case 'donate':
+// 		if (args.length != 6) {
+// 			console.log('인자 개수 error! 다시입력 ㄱㄱ');
+// 			break;
+// 		}
+// 		invoke('donate', [args[3], args[4], args[5]]);
+// 		break;
+
+// 	case 'use':
+// 		if (args.length != 4) {
+// 			console.log('인자 개수 error! 다시입력 ㄱㄱ');
+// 			break;
+// 		}
+// 		invoke('use', [args[3]]);
+// 		break;
+// 	default:
+// 		break;
+// }
 
 async function invoke(func, params) {
 	console.log('\n\n --- invoke.js - start');
@@ -123,12 +127,22 @@ async function invoke(func, params) {
 					txId: tx_id
 				};
 				break;
+			// case 'getDonatedSerials':
+			// 	proposal_request = {
+			// 		targets: [peer],
+			// 		chaincodeId: 'bloodchain',
+			// 		fcn: 'getDonatedSerials',
+			// 		args: [params[0], params[1]],
+			// 		chainId: 'bloodchannel',
+			// 		txId: tx_id
+			// 	};
+			// 	break;
 			case 'donate':
 				proposal_request = {
 					targets: [peer],
 					chaincodeId: 'bloodchain',
 					fcn: 'donate',
-					args: [params[0], params[1], params[2], params[3]],
+					args: [params[0], params[1], params[2]],
 					chainId: 'bloodchannel',
 					txId: tx_id
 				};

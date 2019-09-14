@@ -36,9 +36,11 @@
 
 <%if(!locals.user_id){%>    
     <script>
-        location.replace = '/';  
+        alert('로그아웃 상태입니다. 메인으로 돌아갑니다.');
+        location.href = '/';  
     </script>
 <%}%>
+
 
 <body>  
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
@@ -96,17 +98,22 @@
 
                 <ul class="navbar-nav p-3">
                     <li class="nav-item p-1">
-                        등록한 헌혈증 개수: <%=locals.bdcard_count%>개
+                        총 <a style="color: green"><%=locals.bdcard_count + locals.dona_count%></a>개의 헌혈증을 등록하셨고,
+                        그 중  <a style="color: red"><%=locals.dona_count%></a>개를 기부해 <a style="color: blue"><%=locals.bdcard_count%></a>개를 더 기부하실 수 있습니다. 
+                        <a href="/blood/blood_register">▶등록하러가기   </a>
+                        <a href="/blood/blood_donation_main">▶기부하러가기</a>
                     </li>
                     <li class="nav-item p-1">
-                        기부한 헌혈증 개수: <%=locals.dona_count%>개
+                        총 <a style="color: green"><%=locals.donated_bdcard_count%></a>개의 헌혈증을 기부받으셨습니다.
+                        <a href="/blood/blood_request">▶기부요청글 올리기</a>
+
                     </li>
                     <li class="nav-item p-1">
                         등급: <%=locals.class%>
                     </li>
                     <li class="nav-item p-1">
                         <div class="progress">
-                            <div class="progress-bar bg-warning" style="width: <%=per%>%;"></div>
+                            <div class="progress-bar bg-warning" style="width: <%=per%>%"></div>
                         </div>
                     </li>
                     <li class="nav-item p-1">

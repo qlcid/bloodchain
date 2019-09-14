@@ -23,6 +23,11 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             defaultValue: 0,
         },
+        is_all_used: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: false,
+        },
         reg_date: {
             type: DataTypes.DATE,
             allowNull: false,
