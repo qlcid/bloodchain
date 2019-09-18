@@ -7,7 +7,7 @@
     <meta name="description" content="">
     <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
     <meta name="generator" content="Jekyll v3.8.5">
-    <title>헌혈증 등록</title>
+    <title>헌혈증 사용내역</title>
 
     <link rel="canonical" href="https://getbootstrap.com/docs/4.3/examples/jumbotron/">
 
@@ -44,10 +44,61 @@
         crossorigin="anonymous"></script>
     <%- include("header_login.ejs")%>
 
+    <%if(!locals.user_id){%>
+    <script>
+        $(function () {
+            $("#blood_req, .donation")
+                .removeAttr()
+                .click(function () { alert('회원만 이용할 수 있습니다. 회원가입을 해주세요!') });
+        });
+    </script>
+    <%}%>    
 
+
+    <%if(locals.user_id){%>
+    <%- include('header_login.ejs')%>
+    <%}else{%>
+    <%- include('header_logout.ejs')%>
+    <%}%>
+    <p></p>
+    <p>a</p>
+    <p>a</p>
     <main>
-        <div class="jumbotron">
-            
+
+        <div class="container">
+            <h3>기부받은 헌혈증 목록</h3>
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>번호</th>
+                        <th>일련번호</th>
+                        <th>등록날짜</th>
+                        <th>기부자</th>
+                        <th>기부날짜</th>
+                        <th>사용여부</th>
+                        <th>사용날짜</th>
+                        <th>사용처</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <%for (var i = 0; i < data.length; i++) { %>
+                        <tr>
+                            <td><%=i + 1%></td>
+                            <td><%=data[i].Key%></td>
+                            <td><%=data[i].Record.reg_date%></td>
+                            <td><%=data[i].Record.donater%></td>
+                            <td><%=data[i].Record.dona_date%></td>
+                            <% if (data[i].Record.is_used == true) {%>
+                                <td>O</td>
+                            <%} else {%>
+                                <td>X</td>
+                            <%}%>
+                            <td><%=data[i].Record.used_date%></td>
+                            <td><%=data[i].Record.used_place%></td>
+                        </tr>
+                    <%}%>
+                </tbody>
+            </table>
         </div>
     </main>
 
