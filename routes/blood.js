@@ -256,27 +256,14 @@ router.post('/blood_use', async function (req, res, next) {
 });
 
 // 헌혈증 기부내역 확인    main화면에서 기부내역 확인하러가기 >> 버튼 
-router.get('/blood_history', function (req, res, next) {
-  Bdcard.findAll({
-    include: [
-      {model: User, required: true},
-    ]
-  }).then(function (bdcards) {
-    var result = {};
+router.get('/blood_history', async function (req, res, next) {
+  var owner = req.user.user_id;
+  var serials = await querySDK.query('donated', owner);
 
-    if (req.user) {
-      Object.assign(result, req.user);
-    }
-    Object.assign(result, { register: false });
-    if (bdcards) {
-      Object.assign(result, { bdcards: bdcards });
-    }
-
-    querySDK.invoke('donated', [req.user_id]);
-    res.render('blood_history', result);
-  }).catch(function (err) {
-    console.log(err);
-  });
+  if (req.user)
+    res.render('blood_history', Object.assign(req.user, {data: serials}));
+  else
+    res.render('blood_history');
 });
 
 
