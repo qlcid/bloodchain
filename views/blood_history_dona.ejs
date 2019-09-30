@@ -43,21 +43,14 @@
 </head>
 
 <body>    
-    <%- include("header_login.ejs")%>
-
     <%if(!locals.user_id){%>    
         <script>
             alert('로그아웃 상태입니다. 메인으로 돌아갑니다.');
             location.href = '/';  
         </script>
     <%}%> 
-
-
-    <%if(locals.user_id){%>
-        <%- include('header_login.ejs')%>
-    <%}else{%>
-        <%- include('header_logout.ejs')%>
-    <%}%>
+    
+    <%- include("header_login.ejs")%>
 
     <main>
         <div class="container">

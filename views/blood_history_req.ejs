@@ -43,8 +43,6 @@
 </head>
 
 <body>    
-    <%- include("header_login.ejs")%>
-
     <%if(!locals.user_id){%>    
         <script>
             alert('로그아웃 상태입니다. 메인으로 돌아갑니다.');
@@ -52,13 +50,22 @@
         </script>
     <%}%> 
 
-
-    <%if(locals.user_id){%>
-        <%- include('header_login.ejs')%>
+    <%- include("header_login.ejs")%>
+    
+    <!-- <%if(req_id){%>
+        <script>
+            $(document).ready(() => {
+                alert("<%=req_id%>")
+                $('.card.' + "<%=req_id%>").addClass('border-danger')
+            })
+        </script>
     <%}else{%>
-        <%- include('header_logout.ejs')%>
-    <%}%>
-
+        <script>
+            $(document).ready(() => {
+                $('.card.10').removeClass('border-danger')
+            })
+        </script>
+    <%}%> -->
     <%function getFormatDate (date) { 
         var year = date.getFullYear();
         var month = (1 + date.getMonth());
@@ -144,7 +151,7 @@
                     <%var reqboard = bloodCard.reqboard;%>
                     <%var id = reqboard.req_user_id;%>
                     <div class="col-sm-6 shadow-lg p-3 mb-5 bg-white rounded">
-                        <div class="card">
+                        <div class="card <%=keys[i]%>" >
                             <div class="card-body">
                                 <h5 class="card-text"><%=id%>님이 요청하신 <%=keys[i]%>번 기부요청글에 기부하셨습니다.</h5>
                                 <p class="card-text">

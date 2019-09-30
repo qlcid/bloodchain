@@ -58,7 +58,7 @@
         </ul>
     </div>
 </nav>
-<br><br><br>
+<br><br><br><br>
 
 <script>
     $(document).ready(function () {
@@ -93,13 +93,13 @@
                     if(data.finish){
                         $('#dona_alerm').toast('show');
                         $('#req_id').text(data.req_id);
-                        $('#see_dona').attr('href', '/blood/blood_history_req?req_id=' + data.req_id);
+                        $('#see_dona').attr('href', '/blood/blood_history_req?req_id=' + data.req_id + '&alarm=fin');
                         $('#distinct').text('기부완료')
-                    }
+                    } 
                     if(data.use){
                         $('#dona_alerm').toast('show');
                         $('#req_id').text(data.req_id);
-                        $('#see_dona').attr('href', '/blood/blood_history_req?req_id=' + data.req_id);
+                        $('#see_dona').attr('href', '/blood/blood_history_req?req_id=' + data.req_id + '&alarm=use');
                         $('#distinct').text('사용완료');
                     }
                 },
