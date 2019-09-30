@@ -31,16 +31,15 @@
             }
         }
     </style>
+    
     <!-- Custom styles for this template -->
     <link href="/bootstrap/jumbotron.css" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.3.1.min.js"
-    integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
-    crossorigin="anonymous"></script>
-<script>window.jQuery || document.write('<script src="/bootstrap/jquery-slim.min.js"><\/script>')</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"
-    integrity="sha384-xrRywqdh3PHs8keKZN+8zzc5TX0GRTLCcmivcbNJWm2rs5C8PRhcEn3czEjhAO9o"
-    crossorigin="anonymous"></script>
-</head>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" crossorigin="anonymous">
+        integrity = "sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"</script>
+    <script>window.jQuery || document.write('<script src="/bootstrap/jquery-slim.min.js"><\/script>')</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"
+        integrity="sha384-xrRywqdh3PHs8keKZN+8zzc5TX0GRTLCcmivcbNJWm2rs5C8PRhcEn3czEjhAO9o"
+        crossorigin="anonymous"></script>
 
 <!-- 회원가입 성공 후 main으로 돌아올 경우 알려주고 url 바꿔줌  -->
 <%if(register == "success"){%>
@@ -56,13 +55,8 @@
         location.href='/';
     </script>
 <%}%>
-<script>
-    locaion.href='/';
-</script>
+
 <body>
-
-   
-
     <!-- 로그인 했을 때와 안했을 때 header 다름 -->
     <%if(locals.user_id){%>
     <%- include('header_login.ejs')%>
@@ -98,103 +92,96 @@
                 </div>
                 <div class="col-md-4">
                     <h2>기부내역</h2>
-                    <p>기부한 헌혈증 내역을 확인할 수 있고, 어떻게 사용되었는지 확인할 수 있습니다.</p>
-                    <p><a id="blood_history" class="btn btn-success" href="/blood/blood_history" role="button">기부내역 확인하러 가기 &raquo;</a></p>
+                    <p>기부한 헌혈증을 기부요청글 별로 확인할 수 있습니다.</p>
+                    <p><a id="blood_history_donate" class="btn btn-success" href="/blood/blood_history_req" role="button">기부내역 보러가기 &raquo;</a></p>
                 </div>
             </div>
             <hr>
-            <div class="row">
-                <h2>
-                    <p>기부왕은 누굴까 ㅎㅎ</p>
-                </h2>
-            </div>
-            <!-- Example row of columns -->
-            <div class="row">
-                <div class="col-md-4">
-                    <h2>기부왕</h2>
-                    <ol>
-                        <li>안재철(105개, 다이아)</li>
-                        <li>b(88개, 플레티넘)</li>
-                        <li>c(79개, 플레티넘)</li>
-                        <li>d(71개, 골드)</li>
-                        <li>e(63개, 골드)</li>
-                    </ol>
+            <%if(locals.dona_count){%>
+                <div class="row">
+                    <div class="col-md-4">
+                        <p></p>총 <a style="color: green"><%=locals.bdcard_count + locals.dona_count%></a>개의 헌혈증을 등록하셨고,</p>
+                    </div>
                 </div>
+                <div class="row">
+                    <div class="col-md-3">
+                        <p>그 중  <a style="color: red"><%=locals.dona_count%></a>개를 기부해</p>
+                    </div>
 
-                <div class="col-md-4">
-                    <h2>지난달 기부왕</h2>
-                    <ol>
-                        <li>a(23개)</li>
-                        <li>b(21개)</li>
-                        <li>c(16개)</li>
-                        <li>d(14개)</li>
-                        <li>e(13개)</li>
-                    </ol>
+                    <div class="col-md-3">
+                        <p><a id="dona" class="btn btn-danger" href="/blood/blood_history_dona_all">기부한 모든 헌혈증 목록 확인 &raquo;</a></p>
+                    </div>
                 </div>
-                <div class="col-md-4">
-                    <h2>오늘의 기부왕</h2>
-                    <ol>
-                        <li>a(6개)</li>
-                        <li>b(6개)</li>
-                        <li>c(5개)</li>
-                        <li>d(3개)</li>
-                        <li>e(2개)</li>
-                    </ol>
+                <div class="row">
+                    <div class="col-md-3">
+                            <p><a style="color: blue"><%=locals.bdcard_count%></a>개를 더 기부하실 수 있습니다. 
+                    </div>
+
+                    <div class="col-md-4">
+                            <a id="only_reg" class="btn btn-primary" href="/blood/onlyReg_blood_list"> 아직 기부하지 않은 헌혈증 목록 확인 &raquo;</a>
+                    </div>
                 </div>
-            </div>
+            <%}else{%>
+                <div class="row">
+                     <div class="col-md-4">
+                        <p>헌혈증 등록내역이 존재하지 않습니다.</p>
+                    </div>
+                </div>
+            <%}%>
+            <hr>
+            <%if(locals.donated_bdcard_count){%>
+                <div class="row">
+                    <div class="col-md-4">
+                        <p>총 <a style="color: blueviolet"><%=locals.donated_bdcard_count%></a>개의 헌혈증을 기부받으셨습니다.</p>
+                    </div>
+                    <div class="col-md-4">
+                            <a id="donated" class="btn btn-primary" href="/blood/donated_blood_list"> 기부받은 헌혈증 목록 확인 &raquo;</a>
+                    </div>
+                </div>
+            <%}else{%>
+                <div class="row">
+                     <div class="col-md-4">
+                        <p>헌혈증 기부내역이 존재하지 않습니다.</p>
+                    </div>
+                </div>
+            <%}%>
+
             <hr>
             <div class="row">
-                <h2>
-                    <p>등록왕은 누굴까 ㅎㅎ</p>
-                </h2>
+                
             </div>
             <div class="row">
                 <div class="col-md-4">
-                    <h2>등록왕</h2>
-                    <ol>
-                        <li>안재철(105개, 다이아)</li>
-                        <li>b(88개, 플레티넘)</li>
-                        <li>c(79개, 플레티넘)</li>
-                        <li>d(71개, 골드)</li>
-                        <li>e(63개, 골드)</li>
-                    </ol>
+                    
                 </div>
 
                 <div class="col-md-4">
-                    <h2>지난달 등록왕</h2>
-                    <ol>
-                        <li>a(23개)</li>
-                        <li>b(21개)</li>
-                        <li>c(16개)</li>
-                        <li>d(14개)</li>
-                        <li>e(13개)</li>
-                    </ol>
+                    
                 </div>
                 <div class="col-md-4">
-                    <h2>오늘의 등록왕</h2>
-                    <ol>
-                        <li>a(6개)</li>
-                        <li>b(6개)</li>
-                        <li>c(5개)</li>
-                        <li>d(3개)</li>
-                        <li>e(2개)</li>
-                    </ol>
+                  
                 </div>
             </div>
         </div> <!-- /container -->
         <hr>
+        
     </main>
 
     <footer class="container">
         <p>&copy; Company 2017-2019</p>
     </footer>
 
- 
+            
+<script>
+        // $('.toast').toast('show');
+        // $('#toast').tost()
+    
+    </script>
 
     <%if(!locals.user_id){%>
         <script>    
            $(function () {
-                $("#blood_reg, #blood_history, #blood_req")
+                $("#blood_reg, #blood_history_donate, #only_reg, #dona")
                     .removeAttr('href')
                     .click(function () { alert('회원만 이용할 수 있습니다. 회원가입을 해주세요!') });
             

@@ -3,8 +3,9 @@ var router = express.Router();
 var sequelize = require('sequelize');
 var invokeSDK = require('../fabric/sdk/javascript-sdk/invoke.js');
 var querySDK = require('../fabric/sdk/javascript-sdk/query.js');
+var date = require('../util/date.js');
 
-const { User, Bdcard, Reqboard } = require('../models');
+const { User, Bdcard, Reqboard, Donate } = require('../models');
 
 // 헌혈증 등록    main화면에서 헌혈증 등록하러가기 >> 버튼
 router.get('/blood_register', function (req, res, next) {
@@ -23,8 +24,8 @@ router.post('/blood_register_do', function (req, res, next) {
   // 헌혈증 중복 검사
   Bdcard.findAll({
     attributes: ['serial_number'],
-  }).then(function (result) {
-    result.forEach(element => {
+  }).then(function (resultHash) {
+    resultHash.forEach(element => {
       data = element.dataValues;
       serial_number = data.serial_number;
       if (req.body.bnum == serial_number) {
@@ -93,14 +94,14 @@ router.get('/blood_donation_main', function (req, res, next) {
       {model: User, required: true},
     ]
   }).then(function (reqboards) {
-    var result = {};
+    var resultHash = {};
     if (req.user) {
-      Object.assign(result, req.user);
+      Object.assign(resultHash, req.user);
     }
-    Object.assign(result, { register: false });
-    Object.assign(result, { reqboards: reqboards });
+    Object.assign(resultHash, { register: false });
+    Object.assign(resultHash, { reqboards: reqboards });
 
-    res.render('blood_donation_main', result);
+    res.render('blood_donation_main', resultHash);
   }).catch(function (err) {
     console.log(err);
   });
@@ -135,13 +136,13 @@ router.post('/blood_request_do', function (req, res, next) {
         {model: User, required: true},
       ]
     }).then(function (reqboards) {
-      var result = {};
-      Object.assign(result, req.user);
-      Object.assign(result, { register: "success" });
+      var resultHash = {};
+      Object.assign(resultHash, req.user);
+      Object.assign(resultHash, { register: "success" });
       if (reqboards) {
-        Object.assign(result, { reqboards: reqboards });
+        Object.assign(resultHash, { reqboards: reqboards });
       }
-      res.render('blood_donation_main', result);
+      res.render('blood_donation_main', resultHash);
     }).catch(function (err) {
       console.log(err);
     })
@@ -183,15 +184,33 @@ router.post('/blood_donation', async function (req, res, next) {
   user_bdcard_count -= donate_count;
   req.user.dona_count += donate_count;
 
+  var count = req.user.dona_count;
+  var newclass = req.user.class;
+  var temp = newclass;
+  var is_up = false;
+
+  if (count >= 30)
+    newclass = 'diamond'
+  else if (count >= 15)
+    newclass = 'platinum'
+  else if (count >= 10)
+    newclass = 'gold'
+  else if (count >= 5)
+    newclass = 'silver'
+  if(newclass != temp)
+    is_up = true;
+
   await User.update({
     bdcard_count: user_bdcard_count,
-    dona_count: req.user.dona_count
+    dona_count: req.user.dona_count,
+    class: newclass
   },{
       where: { user_id: donater }
   }).catch(function (err) {
     console.log(err);
-  })
+  });
 
+  
   // 기부 요청자 헌혈증 개수 증가
   await User.update({
     donated_bdcard_count: req_donated_bdcard_count + donate_count
@@ -219,12 +238,24 @@ router.post('/blood_donation', async function (req, res, next) {
     console.log(Err);
   })
 
+  // 알람 위해 
+  var donate = await Donate.findOne({
+    where: {donated_id: id, donater: donater}
+  })
+  if(!donate){
+    await Donate.create({
+      donater: donater,
+      donated_id: id
+    });
+  }
   res.send(Object.assign(req.user, {
     user_bdcard_count: user_bdcard_count.toString(),
     donated_count: donated_count_update.toString(), 
     need_more: need_more.toString(),
     req_donated_bdcard_count: (req_donated_bdcard_count + donate_count).toString(),
-    is_finished: is_finished
+    is_finished: is_finished,
+    is_up: is_up,
+    class: newclass
   }));
   
   
@@ -246,7 +277,8 @@ router.post('/blood_use', async function (req, res, next) {
 
   // 요청글 사용 플래그
   await Reqboard.update({
-    is_all_used: true
+    is_all_used: true,
+    used_date: new Date()
   },{
     where:{id: Number(req.body.id)}
   })
@@ -255,16 +287,207 @@ router.post('/blood_use', async function (req, res, next) {
   res.send(req.user);
 });
 
-// 헌혈증 기부내역 확인    main화면에서 기부내역 확인하러가기 >> 버튼 
-router.get('/blood_history', async function (req, res, next) {
+// async function assignObject(bcBloods){
+//   var resultHash = new Array();
+
+//   await bcBloods.forEach(async (bcBlood) => {
+//     var dbBlood = await Bdcard.findOne({
+//       where: {serial_number: bcBlood.Key},
+//       include: [
+//         {model: Reqboard, required: true},
+//       ]
+//     })
+//     if(!resultHash[dbBlood.req_id]){
+//       //console.log('zzzz ---------->' + JSON.stringify(resultHash));
+//       resultHash[dbBlood.req_id] = [dbBlood];
+        
+//         // is_donated: dbBlood.reqboard.is_finished,
+//         // is_all_used: dbBlood.reqboard.is_all_used,
+//         // used_place: dbBlood.reqboard.used_place
+      
+//     }else{
+//       resultHash[dbBlood.req_id].push(dbBlood);
+//     }
+//   });
+
+//   return new Promise(function(resolve, reject){
+//     resolve(resultHash);
+//   });
+// }
+
+// 기부요청글별로 기부내역 보기
+router.get('/blood_history_req', async function (req, res, next) {
+  var user = req.user.user_id;
+  var bcBloods = await querySDK.query('dona', user);
+
+  var resultHash = new Array();
+
+  for(bcBlood of bcBloods){
+    var dbBlood = await Bdcard.findOne({
+      where: {serial_number: bcBlood.Key},
+      include: [
+        {model: Reqboard, required: true},
+      ]
+    })
+    var req_id = dbBlood.req_id;
+    if(!resultHash[req_id]){
+      resultHash[req_id] = [dbBlood];
+    }else{
+      resultHash[req_id].push(dbBlood);
+    }
+  }
+  if(req.user)
+    res.render('blood_history_req', Object.assign(req.user, { resultHash: resultHash}));
+  else
+    res.render('blood_history_req');
+
+  
+});
+
+// 특정 기부요청글에 대해 자신이 기부한 헌혈증 목록
+router.get('/blood_history_dona', async function (req, res, next){
+  var user = req.user.user_id;
+  var req_id = Number(req.query.req_id);
+  var bcBloods = await querySDK.query('dona', user);
+
+  var data = [];
+
+  for(bcBlood of bcBloods){
+    var dbBlood = await Bdcard.findOne({
+      where: {serial_number: bcBlood.Key},
+    })
+    if(dbBlood.req_id == req_id){
+      bcBlood.Record.dbBlood = dbBlood;
+      data.push(bcBlood);   
+    }
+  }
+  if(req.user)
+    res.render('blood_history_dona', Object.assign(req.user, {data: data, req: true}));
+  else
+    res.render('blood_history_dona');
+})
+
+// 기부한 모든 헌혈증 목록
+router.get('/blood_history_dona_all', async function (req, res, next){
+  var user = req.user.user_id;
+  var bcBloods = await querySDK.query('dona', user);
+
+  var data = [];
+
+  for(bcBlood of bcBloods){
+    var dbBlood = await Bdcard.findOne({
+      where: {serial_number: bcBlood.Key},
+    })
+    bcBlood.Record.dbBlood = dbBlood;
+    data.push(bcBlood);   
+  }
+  if(req.user)
+    res.render('blood_history_dona', Object.assign(req.user, {data: data, req: false}));
+  else
+    res.render('blood_history_dona');
+})
+// 등록했지만 아직 기부하지 않은 헌혈증 목록
+router.get('/onlyReg_blood_list', async function (req, res, next) { 
+  var owner = req.user.user_id;
+  var bcbloods = await querySDK.query('onlyreg', owner);
+
+  var data = [];
+
+  for(bcblood of bcbloods){
+    var dbblood = await Bdcard.findOne({
+      where: {serial_number: bcblood.Key}
+    })
+    bcblood.Record.dbblood = dbblood;
+    data.push(bcblood);
+  }
+  if (req.user)
+    res.render('onlyReg_blood_list', Object.assign(req.user, {data: data}));
+  else
+    res.render('onlyReg_blood_list');
+});
+
+// 기부받은 헌혈증 내역 확인
+router.get('/donated_blood_list', async function (req, res, next) {
   var owner = req.user.user_id;
   var serials = await querySDK.query('donated', owner);
 
+  console.log(JSON.stringify(Object.assign(req.user, {data: serials})));
+
   if (req.user)
-    res.render('blood_history', Object.assign(req.user, {data: serials}));
+    res.render('donated_blood_list', Object.assign(req.user, {data: serials}));
   else
-    res.render('blood_history');
+    res.render('donated_blood_list');
 });
 
+
+
+// 기부, 사용에 대한 알림을 위한 라우터
+
+// 기부 완료되거나 완료되었는데 아직 사용 안된 상태면 used: false 전송해서 알림 (기부요청자 입장)
+router.post('/donated_finished_check', async function (req, res, next){
+  var user = req.user.user_id;
+  
+  var reqboards = await Reqboard.findAll({
+    where: {req_user_id: user, is_finished: true, is_all_used: false},
+    attributes: ['id']
+  })
+  var result = {};
+  if(req.user)
+    Object.assign(result, req.user);
+
+  if(reqboards.length != 0){
+    res.send(Object.assign(result, {
+      reqboards: reqboards,
+      used: false
+    }));
+  }else{
+    res.send(Object.assign(result, {
+      used: true
+    }));
+  }
+})
+
+// 내가 기부한 기부요청글의 모든 기부가 완료되면 (기부자 입장)
+router.post('/dona_finished_check', async function (req, res, next){
+  var user = req.user.user_id;
+
+  var donates = await Donate.findAll({
+    where: {donater: user},
+    include: [
+      {model: Reqboard, required: true}
+    ]
+  });
+  
+  var finish = false;
+  var use = false;
+  var req_id;
+  for(donate of donates){
+    if(donate.reqboard.is_finished && !donate.finished_noticed){
+      await Donate.update({
+        finished_noticed: true
+      },{
+        where: {id: donate.id},
+      });
+      finish = true;
+      req_id = donate.reqboard.id;
+    }
+    if(donate.reqboard.is_all_used && !donate.used_noticed){
+      await Donate.update({
+        used_noticed: true
+      },{
+        where: {id: donate.id},
+      });
+      use = true;
+      req_id = donate.reqboard.id;
+    }
+  }
+  if(req.user){
+    res.send(Object.assign(req.user, {
+      finish: finish,
+      use: use,
+      req_id: req_id
+    }))
+  }
+})
 
 module.exports = router;

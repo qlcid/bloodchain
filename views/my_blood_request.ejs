@@ -15,9 +15,11 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
         integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
-    <script src="https://code.jquery.com/jquery-3.3.1.min.js"
-        crossorigin="anonymous">
-        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"</script>
+    <!-- Custom styles for this template -->
+    <link href="/bootstrap/jumbotron.css" rel="stylesheet">
+    
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" crossorigin="anonymous">
+        integrity = "sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"</script>
     <script>window.jQuery || document.write('<script src="/bootstrap/jquery-slim.min.js"><\/script>')</script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"
         integrity="sha384-xrRywqdh3PHs8keKZN+8zzc5TX0GRTLCcmivcbNJWm2rs5C8PRhcEn3czEjhAO9o"
@@ -48,13 +50,14 @@
     </script>
 <%}%>
 
-<body>  
+<body> 
+    <div class="row-sm-5">
     <%- include("header_login.ejs")%>
-    <p></p>
-    <p>a</p>
-    <p>a</p>
+</div>
+    
     <main>
         <div class="container text-center">
+        <h1>내 기부요청 목록</h1>
         <%if(Object.keys(reqboards).length != 0){%> <!--올린 기부요청글이 있을 때-->
             <table class="table table-striped table-hover">
                 <thead>
@@ -148,8 +151,13 @@
     </main>
 
 
-
 <script>
+    $(document).ready(function () {
+        $('#donated_alerm').on('shown.bs.toast', function () {
+            $('#donated_alerm').toast('hide');
+        })
+    });
+
     $('.use button').click(function(){
         var button = $(this);
         var id = button.attr('id');

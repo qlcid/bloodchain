@@ -32,6 +32,14 @@
         }
     </style>
     <!-- Custom styles for this template -->
+    <link href="/bootstrap/jumbotron.css" rel="stylesheet">
+    
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" crossorigin="anonymous">
+        integrity = "sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"</script>
+    <script>window.jQuery || document.write('<script src="/bootstrap/jquery-slim.min.js"><\/script>')</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"
+        integrity="sha384-xrRywqdh3PHs8keKZN+8zzc5TX0GRTLCcmivcbNJWm2rs5C8PRhcEn3czEjhAO9o"
+        crossorigin="anonymous"></script>
 </head>
 
 <%if(!locals.user_id){%>    
@@ -42,16 +50,16 @@
 <%}%>
 
 <body>
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
-        crossorigin="anonymous"></script>
-    <script>window.jQuery || document.write('<script src="/bootstrap/jquery-slim.min.js"><\/script>')</script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"
-        integrity="sha384-xrRywqdh3PHs8keKZN+8zzc5TX0GRTLCcmivcbNJWm2rs5C8PRhcEn3czEjhAO9o"
-        crossorigin="anonymous"></script>
+    
 
 
-
+    <script>
+        $(function () {
+            $("#need_count").on("keyup", function () {
+                $(this).val($(this).val().replace(/[^0-9]/g, ""));
+            });
+        })
+    </script>
     <main>
         <%- include('header_login.ejs')%>
 
@@ -62,36 +70,37 @@
                     <h2 class="text-center">기부요청하기</h2>
                 </p>
                 <div class="form-group row">
-                    <label for="inputBdate" class="col-sm-2 col-form-label text-right">제목</label>
+                    <label for="inputTitle" class="col-sm-2 col-form-label text-right">제목</label>
                     <div class="col">
                         <input type="text" id="title" name="title" class="form-control col-sm-4" placeholder="내용을 입력해주세요" required>
                     </div>
                 </div>
-
+                
                 <div class="form-group row">
-                    <label for="inputBnum" class="col-sm-2 col-form-label text-right">진단서 첨부</label>
+                    <label for="inputDiagnosis" class="col-sm-2 col-form-label text-right">증빙서류 업로드</label>
+                    <br>
                     <div class="col-sm-6">
                         <input type="file" class="custom-file-input" name="diagnosis" id="diagnosis" aria-describedby="inputGroupFileAddon01">
-                        <label class="custom-file-label col-sm-5" for="inputGroupFile01">진단서 파일을 업로드 해주세요.</label>
+                        <label class="custom-file-label col-sm-8" for="inputGroupFile01">실제혈액 수혈(사용)량 확인이 가능한 의료기관 발급 증빙서류를 첨부해주세요.</label>
                     </div>
                 </div>
                 <div class="form-group row">
-                    <label for="inputBdate" class="col-sm-2 col-form-label text-right">사용될 병원</label>
+                    <label for="inputUsed_place" class="col-sm-2 col-form-label text-right">사용될 병원</label>
                     <div class="col">
                         <input type="text" id="used_place" name="used_place" class="form-control col-sm-4" placeholder="사용될 병원의 이름을 입력해주세요" required>
                     </div>
                 </div>
                
                 <div class="form-group row">
-                    <label for="inputBtype" class="col-sm-2 col-form-label text-right">필요한 헌혈증 개수</label>
+                    <label for="inputNeed_count" class="col-sm-2 col-form-label text-right">필요한 헌혈증 개수</label>
                     <div class="col">
-                        <input type="text" id="need_count" name="need_count" class="form-control col-sm-4" placeholder="필요한 헌혈증 개수를 입력해주세요" required>
+                        <input type="text" id="need_count" name="need_count" class="form-control col-sm-4" placeholder="필요한 헌혈증 개수를 숫자로만 입력해주세요" required>
                     </div>
                 </div>
                 <div class="form-group row">
-                    <label for="inputBname" class="col-sm-2 col-form-label text-right">사연</label>
+                    <label for="inputStorye" class="col-sm-2 col-form-label text-right">사연</label>
                     <div class="col">
-                        <textarea rows="10" id="story" name="story" class="form-control col-sm-6" aria-label="With textarea" placeholder="사연을 입력해주세요"></textarea>
+                        <textarea rows="10" cols="5" id="story" name="story" class="form-control col-sm-4" aria-label="With textarea" placeholder="사연을 입력해주세요"></textarea>
                     </div>
                 </div>
 

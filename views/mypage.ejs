@@ -32,6 +32,14 @@
         }
     </style>
     <!-- Custom styles for this template -->
+    <link href="/bootstrap/jumbotron.css" rel="stylesheet">
+    
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" crossorigin="anonymous">
+        integrity = "sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"</script>
+    <script>window.jQuery || document.write('<script src="/bootstrap/jquery-slim.min.js"><\/script>')</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"
+        integrity="sha384-xrRywqdh3PHs8keKZN+8zzc5TX0GRTLCcmivcbNJWm2rs5C8PRhcEn3czEjhAO9o"
+        crossorigin="anonymous"></script>
 </head>
 
 <%if(!locals.user_id){%>    
@@ -43,19 +51,12 @@
 
 
 <body>  
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
-        crossorigin="anonymous"></script>
-    <script>window.jQuery || document.write('<script src="/bootstrap/jquery-slim.min.js"><\/script>')</script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"
-        integrity="sha384-xrRywqdh3PHs8keKZN+8zzc5TX0GRTLCcmivcbNJWm2rs5C8PRhcEn3czEjhAO9o"
-        crossorigin="anonymous"></script>
+    
 
     <%- include("header_login.ejs")%>
 
     <main>
         <div class="container">
-            <br><br><br>
             <p><h2>마이페이지</h2></p>
 
             <div class="bg-light m-3 p-3 row">
@@ -67,33 +68,30 @@
 
                 <%
                     switch (locals.class) {
-                        case '브론즈':
-                            var margin = 50;
+                        case 'bronze':
+                            var margin = 5;
                             var rest = margin - locals.dona_count;
-                            var per =  locals.dona_count / margin * 100;
+                            var per = (5 - rest) / 5 * 100;
                             break;
-                        case '실버':
-                            var margin = 100;
+                        case 'silver':
+                            var margin = 10;
                             var rest = margin - locals.dona_count;
-                            var per =  locals.dona_count / margin * 100;
+                            var per = (5 - rest) / 5 * 100;
                             break;
-                        case '골드':
-                            var margin = 150;
+                        case 'gold':
+                            var margin = 15;
                             var rest = margin - locals.dona_count;
-                            var per =  locals.dona_count / margin * 100;
+                            var per = (5 - rest) / 5 * 100;
                             break;
-                        case '플레티넘':
-                            var margin = 200;
+                        case 'platinum':
+                            var margin = 30;
                             var rest = margin - locals.dona_count;
-                            var per =  locals.dona_count / margin * 100;
+                            var per = (15 - rest) / 15 * 100;
                             break;
-                        case '다이아':
-                            var margin = 300;
-                            var rest = margin - locals.dona_count;
-                            var per =  locals.dona_count / margin * 100;
+                        case 'diamond':
+                            var per = 100;
                             break;
                     }
-
                 %>
 
                 <ul class="navbar-nav p-3">
@@ -117,7 +115,11 @@
                         </div>
                     </li>
                     <li class="nav-item p-1">
-                        앞으로 <%=rest%>개의 헌혈증을 기부하면 등급이 됩니다!
+                        <%if(locals.class == 'diamond'){%>
+                            최고 등급이 되셨습니다!
+                        <%}else{%>
+                            앞으로 <%=rest%>개의 헌혈증을 기부하면 등급이 됩니다!
+                        <%}%>
                     </li>
                 </ul>
 
