@@ -38,7 +38,7 @@ router.get('/mypage', function (req, res, next) {
     res.render('mypage', Object.assign(req.user, {
         register: null, 
         logged: true,
-        login: null
+        login: null,
       })); 
   }else{
     res.render('mypage');

@@ -15,9 +15,10 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
         integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
-    <script src="https://code.jquery.com/jquery-3.3.1.min.js"
-        crossorigin="anonymous">
-        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"</script>
+    <!-- Custom styles for this template -->
+    <link href="/bootstrap/jumbotron.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" crossorigin="anonymous">
+        integrity = "sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"</script>
     <script>window.jQuery || document.write('<script src="/bootstrap/jquery-slim.min.js"><\/script>')</script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"
         integrity="sha384-xrRywqdh3PHs8keKZN+8zzc5TX0GRTLCcmivcbNJWm2rs5C8PRhcEn3czEjhAO9o"
@@ -46,6 +47,7 @@
     
     <%if(register == "success"){%>
     <script>
+        alert('증빙서류가 확인되었습니다!')
         alert('기부요청 게시물을 등록하였습니다!');
         location.href = '/blood/blood_donation_main';
     </script>
@@ -64,28 +66,60 @@
             });
         </script>
     <%}%>
-    <p></p>
-    <p>a</p>
-    <p>a</p>
+
+    <script>
+        if(req_id)
+            $('.donation #' + req_id)
+    </script>
+    
+
+    <div class="modal fade" id="storyModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalCenterTitle">story</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="storyBody">
+                    ...
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+    $('#storyModal').on('show.bs.modal', function (event) {
+        var modal = $(this)
+        var button = $(event.relatedTarget)
+        story = String(button.data('story'));
+       
+        $('#storyBody').text(story);
+    })
+    </script>
     <main>
         <div class="container">
-            <table class="table table-striped table-hover">
+            <table class="table table-striped table-hover text-center">
                 <thead>
                     <tr>
-                        <th>번호</th>
+                        <th width="7%">번호</th>
                         <th>제목</th>
-                        <th>작성자</th>
-                        <th>개인/재단</th>
-                        <th>기부된 개수/필요한 개수</th>
-                        <th></th>
-                        <th></th>
+                        <th width="10%">작성자</th>
+                        <th width="10%">개인/재단</th>
+                        <th width="20%">기부된 개수/필요한 개수</th>
+                        <th width="10%"></th>
+                        <th width="10%"></th>
                     </tr>
                 </thead>
                 <tbody>
                     <%for(var rb of reqboards){%>
                     <tr>
                         <td><%=rb.id%></td>
-                        <td><%=rb.title%></td>
+                        <td><a href="" data-toggle="modal" data-target="#storyModal" data-story="<%=rb.story%>"><%=rb.title%></a></td>
                         <td><%=rb.user.nickname%></td>
                         <%if(rb.user.flag == 0){%>
                             <td>개인</td>
@@ -163,7 +197,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button id="donation" type="button" class="btn btn-secondary" data-toggle="modal" data-target=".bd-example-modal-sm">
+                <button id="donation" type="button" class="btn btn-secondary">
                     기부하기
                 </button>
                 <button id="donationClose" type="button" class="btn btn-primary" data-dismiss="modal">닫기</button>
@@ -173,8 +207,8 @@
 </div>
 
 <!-- 기부 로딩창 -->
-<div class="modal fade bd-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" data-backdrop="static" data-keyboard="false"
-    aria-hidden="true">
+<div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" data-backdrop="static" data-keyboard="false"
+    aria-hidden="true" id="loading">
     <div class="modal-dialog modal-sm modal-dialog-centered">
         <div class="modal-content">
             <div class="d-flex justify-content-center">
@@ -221,28 +255,26 @@
     })
 
     //기부
-    $('#donation').click(function () {
+    $('#donation').click(function (){
 
         donate_count = Number($("#donate_count").val());
         var inputMiss = false;
         if (donate_count == 0) {
             alert('0개를 기부하실 수 없습니다. 다시 입력해주세요.');
-            inputMiss = true;
+            return;
         }else if (user_bdcard_count == 0) {
             alert('등록한 헌혈증이 0개입니다. 새로운 헌혈증을 등록해주세요.');
-            inputMiss = true;
+            return;
         }else if (user_bdcard_count < donate_count) {
             alert('등록한 헌혈증이 ' + donate_count + ' 개 미만입니다. 개수를 다시 입력해주세요.');
-            inputMiss = true;
+            return;
         }else if (donate_count > need_more) {
             alert('필요한 개수를 초과하여 입력하였습니다. 개수를 다시 입력해주세요.');
-            inputMiss = true;
-        }
-        if(inputMiss == true){
-            $('#autoClicked').trigger("click");
-            $('#autoClicked').bind("click");
             return;
         }
+
+        $('#loading').modal('show');
+        
         // ajax로 기부 처리
         $.ajax({
             url: '/blood/blood_donation',
@@ -281,6 +313,8 @@
 
                 // 
                 alert(donate_count + '개의 헌혈증이 기부되었습니다. 감사합니다!');
+                if(data.is_up)
+                    alert(data.class + ' 등급이 되셨습니다! 축하드립니다!')
                 if(data.is_finished){  
                     $('#donation' + id).text('기부완료').css('color', 'green');
                     $('#donationClose').trigger("click");

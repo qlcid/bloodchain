@@ -70,85 +70,67 @@ class BloodChain extends Contract {
         console.info('============= END : Initialize Ledger ===========');
     }
 
- 
+    async getResults(iterator){
+        const allResults = [];
+        while (true) {
+            const res = await iterator.next();
+            if (res.value && res.value.value.toString()) {
+                console.log(res.value.value.toString('utf8'));
+
+                const Key = res.value.key;
+                let Record;
+                try {
+                    Record = JSON.parse(res.value.value.toString('utf8'));
+                } catch (err) {
+                    console.log(err);
+                    Record = res.value.value.toString('utf8');
+                }
+                allResults.push({ Key, Record });
+            }
+            if (res.done) {
+                console.log('end of data');
+                await iterator.close();
+                console.info(allResults);
+                return JSON.stringify(allResults);
+            }
+        }
+    }
 
     // 모든 헌혈증의 모든 value 검색(확인용, 구현 완료) return : 헌혈증 key, value(record) 문자열화 한 배열
     async queryAllBloodCards(ctx) {
-        // var query = {
-        //     "selector": {
-        //         "docType": "bloodCard"
-        //     }
-        // }
         const iterator = await ctx.stub.getQueryResult(`{
             "selector": {
                 "docType": "bloodCard"
             }
         }`);
-        const allResults = [];
-        while (true) {
-            const res = await iterator.next();
-            if (res.value && res.value.value.toString()) {
-                console.log(res.value.value.toString('utf8'));
-
-                const Key = res.value.key;
-                let Record;
-                try {
-                    Record = JSON.parse(res.value.value.toString('utf8'));
-                } catch (err) {
-                    console.log(err);
-                    Record = res.value.value.toString('utf8');
-                }
-                allResults.push({ Key, Record });
-            }
-            if (res.done) {
-                console.log('end of data');
-                await iterator.close();
-                console.info(allResults);
-                return JSON.stringify(allResults);
-            }
-        }
+        return this.getResults(iterator);
     }
 
-    // 등록 o 기부 x    return : 여러개 나올 수 있으므로 queryAllBloodCards와 비슷하게 해야함 reg_date
+    //등록 o 기부 x    return : reg_date
     async queryBloodCardsOnlyReg(ctx, owner) {
         const iterator = await ctx.stub.getQueryResult(`{
             "selector": {
-                "docType": "bloodCard"
+                "docType": "bloodCard",
+                "is_donated": false,
+                "owner": "${owner}"
+            },
+            "fields": ["reg_date"]
+        }`);
+        return this.getResults(iterator);
+    }
+
+    // 기부 o 사용 o | x  return 
+    async queryBloodCardsDona(ctx, donater) {
+        const iterator = await ctx.stub.getQueryResult(`{
+            "selector": {
+                "docType": "bloodCard",
+                "donater": "${donater}"
             }
         }`);
-        const allResults = [];
-
-        while (true) {
-            const res = await iterator.next();
-            if (res.value && res.value.value.toString()) {
-                console.log(res.value.value.toString('utf8'));
-
-                const Key = res.value.key;
-                let Record;
-                try {
-                    Record = JSON.parse(res.value.value.toString('utf8'));
-                } catch (err) {
-                    console.log(err);
-                    Record = res.value.value.toString('utf8');
-                }
-                allResults.push({ Key, Record });
-            }
-
-            if (res.done) {
-                console.log('end of data');
-                await iterator.close();
-                console.info(allResults);
-                return JSON.stringify(allResults);
-            }
-        }
+        return this.getResults(iterator);
     }
 
-    // 기부 o 사용 o | x  return : 여러개 나올 수 있으므로 queryAllBloodCards와 비슷하게 해야함
-    async queryBloodCardsDona(ctx, donater) {
-       
-    }
-
-    // 기부받은 헌혈증 확인 
+    // 기부받은 헌혈증 확인
     async queryBloodCardsDonated(ctx, owner) {
         const iterator = await ctx.stub.getQueryResult(`{
             "selector": {
@@ -157,31 +139,7 @@ class BloodChain extends Contract {
                 "owner": "${owner}"
             }
         }`);
-        const allResults = [];
-
-        while (true) {
-            const res = await iterator.next();
-            if (res.value && res.value.value.toString()) {
-                console.log(res.value.value.toString('utf8'));
-
-                const Key = res.value.key;
-                let Record;
-                try {
-                    Record = JSON.parse(res.value.value.toString('utf8'));
-                } catch (err) {
-                    console.log(err);
-                    Record = res.value.value.toString('utf8');
-                }
-                allResults.push({ Key, Record });
-            }
-
-            if (res.done) {
-                console.log('end of data');
-                await iterator.close();
-                console.info(allResults);
-                return JSON.stringify(allResults);
-            }
-        }
+        return this.getResults(iterator);
     }
 
     // 헌혈증 등록(구현 완료) return : x

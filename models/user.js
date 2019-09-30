@@ -53,5 +53,6 @@ module.exports = (sequelize, DataTypes) => {
         },
     }, {
         timestamps: false,
+        charset: 'utf8'
     });
 };
