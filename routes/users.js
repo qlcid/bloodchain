@@ -5,6 +5,7 @@ var url = require('url');
 
 const { User } = require('../models');
 
+
 // 로그인 라우터
 router.get('/login', function (req, res, next) {
   res.render('login_form');
@@ -13,8 +14,20 @@ router.get('/login', function (req, res, next) {
 // passport로 local 로그인 처리
 router.post('/login_do', passport.authenticate('local', {
   failureRedirect: '/users/login?login=fail',
-}), (req, res, next) => {
-  res.render('main', Object.assign(req.user, {
+}), async (req, res, next) => {
+  var companys = await User.findAll({
+    where: {flag: true},
+    order: [['dona_count', 'DESC']],
+    limit: 5
+  })
+
+  var persons = await User.findAll({
+    where: {flag: false},
+    order: [['dona_count', 'DESC']],
+    limit: 5
+  })
+
+  res.render('main', Object.assign(req.user, {companys: companys, persons: persons}, {
      register: false, 
      logged: true,
      login: true
@@ -22,17 +35,30 @@ router.post('/login_do', passport.authenticate('local', {
 });
 
 // 로그아웃 라우터
-router.get('/logout', function (req, res, next) {
+router.get('/logout', async function (req, res, next) {
   req.logout();
-  res.render('main', {
+
+  var companys = await User.findAll({
+    where: {flag: true},
+    order: [['dona_count', 'DESC']],
+    limit: 5
+  })
+
+  var persons = await User.findAll({
+    where: {flag: false},
+    order: [['dona_count', 'DESC']],
+    limit: 5
+  })
+
+  res.render('main', Object.assign({companys: companys, persons: persons}, {
      register: false, 
      logged: false,
      login: false
-     });
+     }));
 });
 
 // 마이페이지 라우터
-router.get('/mypage', function (req, res, next) {
+router.get('/mypage', async function (req, res, next) {
 
   if(req.user){
     res.render('mypage', Object.assign(req.user, {
@@ -111,7 +137,7 @@ router.post('/register_do', function (req, res, next) {
         });
       }
     });
-  }).then(function () { // node.js 비동기 처리 위해 위처럼 따로 User.create 안하고 then 씀.
+  }).then(async function () { // node.js 비동기 처리 위해 위처럼 따로 User.create 안하고 then 씀.
     // duplicated == false일 때(중복 아닐때) db에 저장
     if (duplicated == false) {
       User.create({
@@ -127,7 +153,20 @@ router.post('/register_do', function (req, res, next) {
       }).catch(function (err) {
         console.log(err);
       });
-      res.render('main', {
+
+      var companys = await User.findAll({
+        where: {flag: true},
+        order: [['dona_count', 'DESC']],
+        limit: 5
+      })
+    
+      var persons = await User.findAll({
+        where: {flag: false},
+        order: [['dona_count', 'DESC']],
+        limit: 5
+      })
+
+      res.render('main', ranks, {companys: companys, persons: persons}, {
         register:"success", 
         logged: false,
         login: false

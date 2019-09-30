@@ -3,7 +3,6 @@ var router = express.Router();
 var sequelize = require('sequelize');
 var invokeSDK = require('../fabric/sdk/javascript-sdk/invoke.js');
 var querySDK = require('../fabric/sdk/javascript-sdk/query.js');
-var date = require('../util/date.js');
 
 const { User, Bdcard, Reqboard, Donate } = require('../models');
 
@@ -317,6 +316,8 @@ router.post('/blood_use', async function (req, res, next) {
 
 // 기부요청글별로 기부내역 보기
 router.get('/blood_history_req', async function (req, res, next) {
+  var req_id = null;
+  
   var user = req.user.user_id;
   var bcBloods = await querySDK.query('dona', user);
 
@@ -336,8 +337,29 @@ router.get('/blood_history_req', async function (req, res, next) {
       resultHash[req_id].push(dbBlood);
     }
   }
+
+  // 알림의 버튼을 통해 요청했을 경우
+  if(req.query.req_id){
+    // 알림여부 업데이트
+    if(req.query.alarm == 'fin'){
+      await Donate.update({
+        finished_noticed: true
+      },{
+        where: {donater: user, donated_id: req.query.req_id},
+      });
+    } else {
+      await Donate.update({
+        used_noticed: true
+      },{
+        where: {donater: user, donated_id: req.query.req_id},
+      });
+    }
+    // 알림된 req_id 강조
+    req_id = req.query.req_id;
+  }
+
   if(req.user)
-    res.render('blood_history_req', Object.assign(req.user, { resultHash: resultHash}));
+    res.render('blood_history_req', Object.assign(req.user, { resultHash: resultHash, req_id: req_id}));
   else
     res.render('blood_history_req');
 
@@ -447,7 +469,7 @@ router.post('/donated_finished_check', async function (req, res, next){
   }
 })
 
-// 내가 기부한 기부요청글의 모든 기부가 완료되면 (기부자 입장)
+// 내가 기부한 기부요청글의 모든 기부가 완료되거나 사용되면 알림(기부자 입장)
 router.post('/dona_finished_check', async function (req, res, next){
   var user = req.user.user_id;
 
@@ -460,23 +482,13 @@ router.post('/dona_finished_check', async function (req, res, next){
   
   var finish = false;
   var use = false;
-  var req_id;
+  var req_id = null;
   for(donate of donates){
     if(donate.reqboard.is_finished && !donate.finished_noticed){
-      await Donate.update({
-        finished_noticed: true
-      },{
-        where: {id: donate.id},
-      });
       finish = true;
       req_id = donate.reqboard.id;
     }
     if(donate.reqboard.is_all_used && !donate.used_noticed){
-      await Donate.update({
-        used_noticed: true
-      },{
-        where: {id: donate.id},
-      });
       use = true;
       req_id = donate.reqboard.id;
     }

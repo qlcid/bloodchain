@@ -141,22 +141,34 @@
             <%}else{%>
                 <div class="row">
                      <div class="col-md-4">
-                        <p>헌혈증 기부내역이 존재하지 않습니다.</p>
+                        <p>헌혈증을 기부받은 내역이 존재하지 않습니다.</p>
                     </div>
                 </div>
             <%}%>
 
             <hr>
-            <div class="row">
-                
-            </div>
+
             <div class="row">
                 <div class="col-md-4">
-                    
+                    <h3>개인회원 기부순위</h3>
+                    <%if(persons){%>
+                        <ol>
+                            <%for(var person of persons){%>
+                                <li><%=person.nickname%>님(<%=person.dona_count%>개)</li>
+                            <%}%>
+                        </ol>
+                    <%}%>
                 </div>
 
                 <div class="col-md-4">
-                    
+                    <h3>기업회원 기부순위</h3>
+                    <%if(companys){%>
+                        <ol>
+                            <%for(var company of companys){%>
+                                <li><%=company.user_name%>님(<%=company.dona_count%>개)</li>
+                            <%}%>
+                        </ol>
+                    <%}%>
                 </div>
                 <div class="col-md-4">
                   
@@ -171,15 +183,9 @@
         <p>&copy; Company 2017-2019</p>
     </footer>
 
-            
-<script>
-        // $('.toast').toast('show');
-        // $('#toast').tost()
-    
-    </script>
-
     <%if(!locals.user_id){%>
         <script>    
+        var a = 3
            $(function () {
                 $("#blood_reg, #blood_history_donate, #only_reg, #dona")
                     .removeAttr('href')
@@ -188,6 +194,9 @@
         }) 
         </script>
     <%}%>
+
+    
+    
 </body>
 
 </html>
