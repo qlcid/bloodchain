@@ -85,6 +85,20 @@ router.get('/my_blood_request', function (req, res, next) {
 });
 
 
+// 마이페이지 - 내 기부요청 관리 - 삭제처리
+router.post('/my_blood_request_delete', function (req, res, next) {
+  var id = Number(req.body.id);
+
+  Reqboard.destroy({
+    where: { id: id }
+  }).then(function (result) {
+    res.send(req.user);
+  }).catch(function (err) {
+    console.log(err);
+  });
+});
+
+
 // 헌혈증 기부, 기부요청목록, 기부요청 메인화면    main화면에서 기부하러/받으러 가기 >> 버튼 
 router.get('/blood_donation_main', function (req, res, next) {
   Reqboard.findAll({

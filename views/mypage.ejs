@@ -157,60 +157,12 @@
 
             <div class="modal-footer">
                 <a class="btn btn-success" href="/blood/my_blood_request" role="button">내 기부요청 관리</a>
-                <button id="modify" type="button" class="btn btn-success" data-dismiss="modal">정보수정</button>
-                <button id="withdraw" type="button" class="btn btn-danger" data-dismiss="modal">회원탈퇴</button>
+                <a class="btn btn-success" href="/users/my_profile_edit" role="button">정보수정</a>
+                <!--button id="withdraw" type="button" class="btn btn-danger" data-dismiss="modal">회원탈퇴</button-->
             </div>
         </div>
     </main>
-
-<!--script>
-    $('.donation').click(function () {
-        if ("<%=locals.user_id%>" == $(this).attr('data-req_user_id')) {
-            $('#donationModal').modal('dispose')
-            alert('asdf')
-
-            $.ajax({
-                url: '/users/my_blood_request',
-                dataType: 'json',
-                type: 'POST',
-                data: { 
-                    id: id,
-                    req_user_id: req_user_id,
-                    nickname: nickname,
-                    donate_count: Number($('#donate_count').val()),
-                    need_count: need_count,
-                    donated_count: donated_count,
-                    used_place: used_place,
-                    bdcard_count: bdcard_count
-                },
-                success: function (data) {
-                    alert(donate_count + '개의 헌혈증이 기부되었습니다. 감사합니다!');
-                    
-                    $('#donationModal').find('#donated_count').text(data.donated_count).css('color', 'red');
-                        $('#donationModal').find('#need_more').text(data.need_more).css('color', 'red');
-                    $('#bcount' + id).text(data.donated_count + '/' + need_count);
-                    
-                    $('#' + id).attr('data-need_count', data.need_count);
-                    $('#' + id).attr('data-donated_count', data.donated_count);
-                    $('#' + id).attr('data-bdcard_count', data.bdcard_count);
-
-                    if (data.is_finished) {
-                        alert('해당 기부요청글의 기부가 완료되었습니다!');
-                       
-                    }
-                    $('#donationClose').trigger("click");
-                    $('#donationClose').bind("click");
-                },
-                error: function (err) {
-                    console.log(err);
-                }
-            });
-        }
-    });
-</script-->
-
-  
-    
 </body>
 
 </html>
+

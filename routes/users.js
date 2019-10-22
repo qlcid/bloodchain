@@ -71,6 +71,54 @@ router.get('/mypage', async function (req, res, next) {
   }
 });
 
+// 마이페이지 - 정보수정
+router.get('/my_profile_edit', function (req, res, next) {
+  res.render('my_profile_edit', Object.assign(req.user, {
+      register: null, 
+      logged: true,
+      login: null
+    })); 
+});
+
+// 마이페이지 - 정보수정 처리
+router.post('/my_profile_edit_do', function (req, res, next) {
+  var id = req.user.user_id;
+  var user_pwd = req.body.password;
+  //var nickname = req.body.nickname;
+
+  User.update({
+    user_pwd: user_pwd,
+    //nickname: nickname
+  },{
+      where: { user_id: id }
+  }).then(async function (result) {
+    req.logout();
+
+    var companys = await User.findAll({
+      where: {flag: true},
+      order: [['dona_count', 'DESC']],
+      limit: 5
+    })
+
+    var persons = await User.findAll({
+      where: {flag: false},
+      order: [['dona_count', 'DESC']],
+      limit: 5
+    })
+
+    res.render('main', Object.assign({companys: companys, persons: persons}, {
+       register: "success_edit", 
+       logged: false,
+       login: false
+       }));
+    /*res.render('my_profile_edit', Object.assign(req.user, { register: "success", 
+      logged: false,
+      login: false }));*/
+  }).catch(function (err) {
+    console.log(err);
+  });
+});
+
 // 개인 회원가입 라우터
 router.get('/register_personal', function (req, res, next) {
   res.render('register_personal_form', {
@@ -181,3 +229,4 @@ router.post('/register_do', function (req, res, next) {
 });
 
 module.exports = router;
+

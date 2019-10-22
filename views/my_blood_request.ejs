@@ -63,8 +63,8 @@
                     <tr>
                         <th>
                             <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input bg-success" id="defaultUnchecked">
-                                <label class="custom-control-label" for="defaultUnchecked"></label>
+                                <input type="checkbox" class="custom-control-input bg-success" id="check_all">
+                                <label class="custom-control-label" for="check_all"></label>
                             </div>
                         </th>
                         <th>번호</th>
@@ -80,12 +80,17 @@
                     <%for(var rb of reqboards){
                     %>
                     <tr>
-                        <th>
-                            <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input bg-success" id="defaultUnchecked">
-                                <label class="custom-control-label" for="defaultUnchecked"><%=rb.id%></label>
-                            </div>
-                        </th>
+                        <%if (rb.donated_count == 0) {%>
+                            <th>
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input bg-success" id="chk<%=rb.id%>" name="check">
+                                    <label class="custom-control-label" for="chk<%=rb.id%>"></label>
+                                </div>
+                            </th>
+                        <%} else {%>
+                            <th></th>
+                        <%}%>
+
                         <td><%=rb.id%></td>
                         <td><%=rb.title%></td>
 
@@ -114,34 +119,41 @@
                         <td><%=getFormatDate(rb.reg_date)%></td>
 
                         <td id="bcount<%=rb.id%>"><%=rb.donated_count%>/<%=rb.need_count%></td>
-                        <%if(rb.is_finished){%>
+                        <%if (rb.is_finished) {%>
                             <td style="color: green">기부완료</td>
-                        <%}else{%>
+                        <%} else {%>
                             <td></td>
                         <%}%>
-                        <%if(rb.is_all_used){%>
+                        <%if (rb.is_all_used) {%>
                             <td style="color: green">사용완료</td>
-                        <%}else{%>
-                            <%if(rb.is_finished){%>
+                        <%} else {%>
+                            <%if (rb.is_finished) {%>
                                 <td class="use" id="<%='use' + rb.id%>">
                                     <button id="<%=rb.id%>" type="button" class="btn-success btn-sm" 
                                         data-need_count="<%=rb.need_count%>">사용하기</button>
                                 </td>
-                            <%}else{%>
+                            <%} else {%>
                                 <td></td>
                             <%}%>
                         <%}%>
-                        <td class="delete">
-                            <button id="<%=rb.id%>" type="button" class="btn-success btn-sm">삭제
-                            </button>
-                        </td>
+                        <%if (rb.donated_count == 0) {%>
+                            <td class="delete" id="<%='delete' + rb.id%>">
+                                <button type="button" class="btn-success btn-sm" data-id="<%=rb.id%>">삭제</button>
+                            </td>
+                        <%}else{%>
+                            <td></td>
+                        <%}%>
                     </tr>
                     <%}%>
                 </tbody>
             </table>
-                
-            <div style="float: right">            
-                <a id="blood_req" href='/blood/blood_request' class="btn btn-success">선택항목 삭제</a>            
+            
+
+            <div id="user_bdcard_count" style="float: left; color: red">※ 게시글 삭제는 기부받은 헌혈증이 0개일 경우만 가능합니다.</div>
+            <div style="float: right">
+                <td class="delete_opt" id="delete_opt">
+                    <button type="button" class="btn-success btn-sm" data-id="<%=rb.id%>">선택항목 삭제</button>
+                </td>          
             </div>
         <%}else{%>
             <div><h4>등록한 기부요청글이 없습니다!</h4></div>
@@ -157,6 +169,45 @@
         })
     });
 
+    // 최상단 체크박스 클릭
+    $("#check_all").click(function () {
+        if ($("#check_all").prop("checked")) {
+            // input 태그의 name이 check인 태그들을 찾아서 checked 옵션을 true로 정의
+            $("input[name=check]").prop("checked", true);
+        } else {
+            // input 태그의 name이 check인 태그들을 찾아서 checked 옵션을 false로 정의
+            $("input[name=check]").prop("checked", false);
+        }
+    });
+
+    // 선택항목 삭제요청
+    $('.delete_opt button').click(function() {
+        var button = $(this);
+    });
+
+    // 삭제요청
+    $('.delete button').click(function() {
+        var button = $(this);
+        var id = button.data('id');
+
+        $.ajax({
+            url: '/blood/my_blood_request_delete',
+            dataType: 'json',
+            type: 'POST',
+            data: { 
+                id: id
+            },
+            success: function (data) {
+                alert('해당 게시글이 정상적으로 삭제되었습니다.');
+                location.href = '/blood/my_blood_request';
+            },
+            error: function (err) {
+                console.log(err);
+            }
+        });
+    });
+
+    // 사용하기
     $('.use button').click(function(){
         var button = $(this);
         var id = button.attr('id');
@@ -187,3 +238,4 @@
 </body>
 
 </html>
+
