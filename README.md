@@ -1,8 +1,7 @@
-#Hyperledger Fabric을 이용한 헌혈증 공유 서비스 구축
-=========================================
-* Hyperledger Fabric, express(Node.js) 기반 웹 서비스 구축 가이드
+# Hyperledger Fabric을 이용한 헌혈증 공유 서비스 구축 
+* Hyperledger Fabric, express(Node.js), sdk 연동한 웹 서비스 구축
 * chaincode : Go 언어가 아닌 javascript(Node.js) 사용
-* fabric sdk : Node.js를 사용
+* fabric sdk : Node.js 사용
 ## 개발환경 설정
 * 가상머신
     * Oracle VM VirtualBox 6.0
