@@ -1,4 +1,1 @@
-# BloodWeb
-df
-
-#aaa
+<pre><code>docker swarm init</code></pre>
