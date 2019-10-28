@@ -18,7 +18,7 @@ Hyperledger Fabric, express(Node.js) 기반 웹 서비스 구축 가이드<br>
     * 5.5.1 이상
 * python
     * 2.7
-
+* Hyperledger Fabric v1.4
 ### Docker CE 설치
 ---------------
 다음의 명령어들을 한 줄씩 실행
@@ -64,7 +64,7 @@ $ sudo usermod -aG docker <사용자id>
 ```
 재로그인 후 확인
 ``` sh
-docker image
+$ docker image
 ```
 ``` sh
 Usage:	docker image COMMAND
@@ -97,7 +97,7 @@ Python 2.7.15+
 ```
 설치 안돼있다면 설치
 ``` sh
-$ sudo apt -y isntall python
+$ sudo apt -y install python
 ```
 ### Node.js, npm 설치
 ---------------
