@@ -20,15 +20,16 @@ Hyperledger Fabric, express(Node.js) 기반 웹 서비스 구축 가이드<br>
     * 2.7
 
 ### Docker CE 설치
-다음의 명령어들을 한 줄씩 실행한다.
+---------------
+다음의 명령어들을 한 줄씩 실행
 
 ``` sh
-sudo apt update
-sh sudo apt install apt-transport-https ca-certificates curl software-properties-common
-sh curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add
-sh sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable
-sh sudo apt update
-sh apt-cache policy docker-ce
+$ sudo apt update
+$ sudo apt install apt-transport-https ca-certificates curl software-properties-common
+$ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add
+$ sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable
+$ sudo apt update
+$ apt-cache policy docker-ce
 ```
 
 모두 실행하면 다음과 같은 메시지가 표시
@@ -49,8 +50,76 @@ docker-ce:
 다음 명령어를 통해 도커를 설치
 
 ``` sh
-sudo apt install docker-ce
+$ sudo apt install docker-ce
 ```
 
+잘 설치돼었는지 확인
 ``` sh
+$ sudo docker version
 ```
+
+사용자 docker 그룹에 추가
+``` sh
+$ sudo usermod -aG docker <사용자id>
+```
+재로그인 후 확인
+``` sh
+docker image
+```
+``` sh
+Usage:	docker image COMMAND
+
+Manage images
+(생략)
+```
+### Docker-Compose 설치
+---------------
+설치
+``` sh
+$ sudo apt -y install docker-compose
+```
+확인
+``` sh
+docker-compose version 1.17.1, build unknown
+docker-py version: 2.5.1
+CPython version: 2.7.15+
+OpenSSL version: OpenSSL 1.1.1  11 Sep 2018
+```
+
+### 파이썬 2.7 설치
+---------------
+설치돼 있는지 확인
+``` sh
+$ python -V
+```
+``` sh
+Python 2.7.15+
+```
+설치 안돼있다면 설치
+``` sh
+$ sudo apt -y isntall python
+```
+### Node.js, npm 설치
+---------------
+설치
+``` sh
+$ curl -sL https://deb.nodesource.com/setup_8.x | sudo bash -
+$ sudo apt install nodejs
+```
+확인
+``` sh
+$ node -v
+```
+``` sh
+v8.16.2
+```
+``` sh
+$ npm -v
+```
+``` sh
+6.4.1
+```
+### Docker CE 설치
+---------------
+### Docker CE 설치
+---------------
