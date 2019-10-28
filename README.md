@@ -1,8 +1,9 @@
 #Hyperledger Fabric을 이용한 헌혈증 공유 서비스 구축
 =========================================
-Hyperledger Fabric, express(Node.js) 기반 웹 서비스 구축 가이드<br>
-체인코드는 Go 언어가 아닌 javascript(Node.js)를 사용했고, fabric sdk 또한 Node.js를 사용
-## 개발환경
+* Hyperledger Fabric, express(Node.js) 기반 웹 서비스 구축 가이드
+* chaincode : Go 언어가 아닌 javascript(Node.js) 사용
+* fabric sdk : Node.js를 사용
+## 개발환경 설정
 * 가상머신
     * Oracle VM VirtualBox 6.0
 * os
@@ -27,7 +28,7 @@ Hyperledger Fabric, express(Node.js) 기반 웹 서비스 구축 가이드<br>
 $ sudo apt update
 $ sudo apt install apt-transport-https ca-certificates curl software-properties-common
 $ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add
-$ sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable
+$ sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable"
 $ sudo apt update
 $ apt-cache policy docker-ce
 ```
@@ -65,8 +66,7 @@ $ sudo usermod -aG docker <사용자id>
 재로그인 후 확인
 ``` sh
 $ docker image
-```
-``` sh
+
 Usage:	docker image COMMAND
 
 Manage images
@@ -80,6 +80,8 @@ $ sudo apt -y install docker-compose
 ```
 확인
 ``` sh
+$ docker compose version
+
 docker-compose version 1.17.1, build unknown
 docker-py version: 2.5.1
 CPython version: 2.7.15+
@@ -91,8 +93,7 @@ OpenSSL version: OpenSSL 1.1.1  11 Sep 2018
 설치돼 있는지 확인
 ``` sh
 $ python -V
-```
-``` sh
+
 Python 2.7.15+
 ```
 설치 안돼있다면 설치
@@ -109,14 +110,12 @@ $ sudo apt install nodejs
 확인
 ``` sh
 $ node -v
-```
-``` sh
+
 v8.16.2
 ```
 ``` sh
 $ npm -v
-```
-``` sh
+
 6.4.1
 ```
 ### Docker CE 설치
