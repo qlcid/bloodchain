@@ -53,9 +53,29 @@ docker-ce:
 $ sudo apt install docker-ce
 ```
 
-잘 설치돼었는지 확인
+잘 설치되었는지 확인
 ``` sh
 $ sudo docker version
+
+Client: Docker Engine - Community
+ Version:           19.03.4
+ API version:       1.40
+ Go version:        go1.12.10
+ Git commit:        9013bf583a
+ Built:             Fri Oct 18 15:54:09 2019
+ OS/Arch:           linux/amd64
+ Experimental:      false
+
+Server: Docker Engine - Community
+ Engine:
+  Version:          19.03.4
+  API version:      1.40 (minimum version 1.12)
+  Go version:       go1.12.10
+  Git commit:       9013bf583a
+  Built:            Fri Oct 18 15:52:40 2019
+  OS/Arch:          linux/amd64
+  Experimental:     false
+(생략)
 ```
 
 사용자 docker 그룹에 추가
@@ -89,7 +109,7 @@ OpenSSL version: OpenSSL 1.1.1  11 Sep 2018
 
 ### 파이썬 2.7 설치
 ---------------
-설치돼 있는지 확인
+설치되어 있는지 확인
 ``` sh
 $ python -V
 
