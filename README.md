@@ -78,7 +78,7 @@ Server: Docker Engine - Community
 (생략)
 ```
 
-사용자 docker 그룹에 추가
+사용자 docker 그룹에 추가 (sudo 없이 docker 명령어 실행하기 위함)
 ``` sh
 $ sudo usermod -aG docker <사용자id>
 ```
