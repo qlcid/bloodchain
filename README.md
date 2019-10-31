@@ -1,7 +1,8 @@
-# Hyperledger Fabric을 이용한 헌혈증 공유 서비스 구축 
+# Hyperledger Fabric을 이용한 헌혈증 공유 서비스 구축
 * Hyperledger Fabric, express(Node.js), sdk 연동한 웹 서비스 구축
 * chaincode : Go 언어가 아닌 javascript(Node.js) 사용
 * fabric sdk : Node.js 사용
+* fabric 공식 sample의 byfn 기반 네트워크 구축
 ## 개발환경 설정
 * 가상머신
     * Oracle VM VirtualBox 6.0
@@ -19,7 +20,8 @@
 * python
     * 2.7
 * Hyperledger Fabric v1.4.3
-### Docker CE 설치
+* 
+### 1. Docker CE 설치
 ---------------
 다음의 명령어들을 한 줄씩 실행
 
@@ -91,7 +93,7 @@ Usage:	docker image COMMAND
 Manage images
 (생략)
 ```
-### Docker-Compose 설치
+### 2. Docker-Compose 설치
 ---------------
 설치
 ``` sh
@@ -107,7 +109,7 @@ CPython version: 2.7.15+
 OpenSSL version: OpenSSL 1.1.1  11 Sep 2018
 ```
 
-### 파이썬 2.7 설치
+### 3. 파이썬 2.7 설치
 ---------------
 설치되어 있는지 확인
 ``` sh
@@ -119,7 +121,7 @@ Python 2.7.15+
 ``` sh
 $ sudo apt -y install python
 ```
-### Node.js, npm 설치
+### 4. Node.js, npm 설치
 ---------------
 설치
 ``` sh
@@ -137,7 +139,5 @@ $ npm -v
 
 6.4.1
 ```
-### Docker CE 설치
----------------
-### Docker CE 설치
+### Hyperledger Fabric 설치
 ---------------
