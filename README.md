@@ -181,8 +181,19 @@ hyperledger/fabric-couchdb     latest              8de128a55539        7 months 
 ```
 ## 구축 메뉴얼
 
-### 1. 패브릭 네트워크 구동
+### 1. 패브릭 네트워
 ------------
+
+* bloodchain
+    * expressApp
+    * fabric
+        * blood-network
+            * 
+        * chaincode
+            * javascript
+        * nodejs-sdk
+        * startNetwork.sh
+
 먼저 작업할 디렉터리 생성
 ```sh
 ~/fabric-samples$ cd ..
