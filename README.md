@@ -188,7 +188,7 @@ hyperledger/fabric-couchdb     latest              8de128a55539        7 months 
     * expressApp
     * fabric
         * blood-network
-            * 
+            * 네트워크 구성 파일들 (yaml)
         * chaincode
             * javascript
         * nodejs-sdk
