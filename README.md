@@ -2,7 +2,9 @@
 * Hyperledger Fabric, express(Node.js), sdk(Node.js) 연동한 웹 서비스 구축
 * chaincode : Go 언어가 아닌 javascript(Node.js) 사용
 * fabric sdk : Node.js 사용
+* 상태 db : couchdb 
 * fabric 공식 sample의 byfn 기반 네트워크 구축
+
 ## 개발환경 설정
 * 가상머신
     * Oracle VM VirtualBox 6.0
@@ -181,7 +183,7 @@ hyperledger/fabric-couchdb     latest              8de128a55539        7 months 
 ```
 ## 구축 메뉴얼
 
-### 1. 패브릭 네트워
+### 1. 작업 디렉터리 구성
 ------------
 
 * bloodchain
@@ -194,8 +196,64 @@ hyperledger/fabric-couchdb     latest              8de128a55539        7 months 
         * nodejs-sdk
         * startNetwork.sh
 
+위와 같이 fabric 관련 리소스들이 담길 fabric 디렉터리 안에 
+fabric 네트워크 구성을 위한 yaml 파일이 담길 blood-network 디렉터리,
+javascript chaincode를 위한 chaincode 디렉터리,
+skd for node.js를 위한 nodejs-sdk 디렉터리
+로 구성되어 있다.
+
+blood-network로 docker에 올라가는 노드들은 다음과 같이 구성된다.
+org1 : peer0.org1.example.com, peer1.org1.example.com (admin1, user1)
+org2 : peer0.org2.example.com, peer1.org2.example.com (admin2, user2)
+(nodejs-sdk에서 각 조직별로 admin과 user을 생성해 user를 통해 네트워크에 접근할 수 있게 한다.)
+
+orderer : orderer.example.com
+cli (명령어줄 인터페이스)
+
 먼저 작업할 디렉터리 생성
 ```sh
 ~/fabric-samples$ cd ..
 ~$ mkdir bloodchain && cd bloodchain
 ```
+네트워크 구성파일들 생성(각자 커스터마이징한 파일들 가능, 본 가이드에서는 first-network 파일 이용)
+프로젝트 주제에 맞게 blood-network로 수정해서 가져온다.
+```sh
+~/bloodchain$ cp -r ../fabric-samples/first-network/ ./blood-network
+```
+
+couchdb 옵션으로 네트워크 up
+```sh
+~/bloodchain$ cd blood-network && ./byfn.sh up -a -n -s couchdb
+```
+다음과 같은 내용이 표시되면 성공
+```
+d orderer connections initialized
+2019-10-29 07:07:39.906 UTC [channelCmd] update -> INFO 002 Successfully submitted channel update
+===================== Anchor peers updated for org 'Org2MSP' on channel 'mychannel' ===================== 
+
+
+========= All GOOD, BYFN execution completed =========== 
+
+
+ _____   _   _   ____   
+| ____| | \ | | |  _ \  
+|  _|   |  \| | | | | | 
+| |___  | |\  | | |_| | 
+|_____| |_| \_| |____/  
+
+```
+
+chaincode 디렉터리가 생성된 것을 확인할 수 있다.
+```sh
+~/bloodchain/blood-network$ cd ..
+~/bloodchain$ ls
+blood-network  chaincode
+```
+
+```sh
+~/bloodchain$ cd chaincode
+~/bloodchain/chaincode$ sudo cp -r ../../fabric-samples/chaincode/fabcar/javascript/ .
+```
+이후 javascript 안에 있는 fabcar.js의 파일 이름을 app에 맞게 바꾸고, 바꾼 파일과 index.js안에있는 fabcar을 모두 app에맞게 바꾼다. (본 프로젝트에서는 bloodchain으로 변경)<br>
+바꾼 bloodchain.js (원래 fabcar.js)에 각자의 app에 맞게 체인코드를 작성한다. [Node.js 체인코드 개발 가이드](https://lab.hanium.or.kr/19-p398/bloodchain/blob/master/Node.js%20%EC%B2%B4%EC%9D%B8%EC%BD%94%EB%93%9C%20%EA%B0%80%EC%9D%B4%EB%93%9C.md)
+
