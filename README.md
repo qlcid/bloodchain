@@ -1,4 +1,4 @@
-# Hyperledger Fabric을 이용한 헌혈증 공유 서비스 구축 가이드
+# Hyperledger Fabric, node.js 체인코드, 웹 연동 구축 가이드
 * Hyperledger Fabric, express(Node.js), sdk(Node.js) 연동한 웹 서비스 구축
 * chaincode : Go 언어가 아닌 javascript(Node.js) 사용
 * fabric sdk : Node.js 사용
@@ -202,28 +202,32 @@ javascript chaincode를 위한 chaincode 디렉터리,
 skd for node.js를 위한 nodejs-sdk 디렉터리
 로 구성되어 있다.
 
-blood-network로 docker에 올라가는 노드들은 다음과 같이 구성된다.
-org1 : peer0.org1.example.com, peer1.org1.example.com (admin1, user1)
-org2 : peer0.org2.example.com, peer1.org2.example.com (admin2, user2)
-(nodejs-sdk에서 각 조직별로 admin과 user을 생성해 user를 통해 네트워크에 접근할 수 있게 한다.)
-
-orderer : orderer.example.com
+blood-network로 docker에 올라가는 노드들은 다음과 같이 구성된다.<br>
+org1 : peer0.org1.example.com, peer1.org1.example.com (admin1, user1)<br>
+org2 : peer0.org2.example.com, peer1.org2.example.com (admin2, user2)<br>
+(nodejs-sdk에서 각 조직별로 admin과 user을 생성해 user를 통해 네트워크에 접근할 수 있게 한다.)<br>
+orderer : orderer.example.com<br>
 cli (명령어줄 인터페이스)
 
-먼저 작업할 디렉터리 생성
+먼저 작업할 fabric 디렉터리 생성
 ```sh
 ~/fabric-samples$ cd ..
-~$ mkdir bloodchain && cd bloodchain
+~$ mkdir bloodchain && cd bloodchain && mkdir fabric && cd fabric
 ```
 네트워크 구성파일들 생성(각자 커스터마이징한 파일들 가능, 본 가이드에서는 first-network 파일 이용)
 프로젝트 주제에 맞게 blood-network로 수정해서 가져온다.
 ```sh
-~/bloodchain$ cp -r ../fabric-samples/first-network/ ./blood-network
+~/bloodchain/fabric$ cp -r ../../fabric-samples/first-network/ ./blood-network
 ```
 
-couchdb 옵션으로 네트워크 up
+현재 channel 이름이 mychannel로 설정되어있는데, 각자 app에 맞게 바꿔준다. 여기에선 bloodchannel로 바꿔준다. 바꾸기 위해 grep, sed 명령어를 이용해 모든 파일에 있는 mychannel을 찾아 변경한다.
 ```sh
-~/bloodchain$ cd blood-network && ./byfn.sh up -a -n -s couchdb
+grep "mychannel" * -rl | xargs sed -i 's/mychannel/bloodchannel/g'
+```
+
+couchdb 옵션으로 byfn 실행해 docker에 네트워크 up
+```sh
+~/bloodchain/fabric$ cd blood-network && ./byfn.sh up -a -n -s couchdb
 ```
 다음과 같은 내용이 표시되면 성공
 ```
@@ -245,15 +249,152 @@ d orderer connections initialized
 
 chaincode 디렉터리가 생성된 것을 확인할 수 있다.
 ```sh
-~/bloodchain/blood-network$ cd ..
-~/bloodchain$ ls
+~/bloodchain/fabric/blood-network$ cd ..
+~/bloodchain/fabric$ ls
 blood-network  chaincode
 ```
 
 ```sh
-~/bloodchain$ cd chaincode
-~/bloodchain/chaincode$ sudo cp -r ../../fabric-samples/chaincode/fabcar/javascript/ .
+~/bloodchain/fabric$ cd chaincode
+~/bloodchain/fabric/chaincode$ sudo cp -r ../../../fabric-samples/chaincode/fabcar/javascript/ .
 ```
 이후 javascript 안에 있는 fabcar.js의 파일 이름을 app에 맞게 바꾸고, 바꾼 파일과 index.js안에있는 fabcar을 모두 app에맞게 바꾼다. (본 프로젝트에서는 bloodchain으로 변경)<br>
 바꾼 bloodchain.js (원래 fabcar.js)에 각자의 app에 맞게 체인코드를 작성한다. [Node.js 체인코드 개발 가이드](https://lab.hanium.or.kr/19-p398/bloodchain/blob/master/Node.js%20%EC%B2%B4%EC%9D%B8%EC%BD%94%EB%93%9C%20%EA%B0%80%EC%9D%B4%EB%93%9C.md)
 
+체인코드를 다음과 같이 환경변수 설정하여 4개의 피어에 설치한다.
+```sh
+export CONFIG_ROOT=/opt/gopath/src/github.com/hyperledger/fabric/peer
+export ORG1_MSPCONFIGPATH=${CONFIG_ROOT}/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
+export ORG1_TLS_ROOTCERT_FILE=${CONFIG_ROOT}/crypto/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
+export ORG2_MSPCONFIGPATH=${CONFIG_ROOT}/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp
+export ORG2_TLS_ROOTCERT_FILE=${CONFIG_ROOT}/crypto/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt
+export ORDERER_TLS_ROOTCERT_FILE=${CONFIG_ROOT}/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
+```
+
+peer0.org1에 설치
+```sh
+docker exec \
+  -e CORE_PEER_LOCALMSPID=Org1MSP \
+  -e CORE_PEER_ADDRESS=peer0.org1.example.com:7051 \
+  -e CORE_PEER_MSPCONFIGPATH=${ORG1_MSPCONFIGPATH} \
+  -e CORE_PEER_TLS_ROOTCERT_FILE=${ORG1_TLS_ROOTCERT_FILE} \
+  cli \
+  peer chaincode install \
+    -n bloodchain \
+    -v 1.0 \
+    -p "/opt/gopath/src/github.com/chaincode/javascript" \
+    -l "node"
+2019-11-13 05:14:08.567 UTC [chaincodeCmd] checkChaincodeCmdParams -> INFO 001 Using default escc
+2019-11-13 05:14:08.567 UTC [chaincodeCmd] checkChaincodeCmdParams -> INFO 002 Using default vscc
+2019-11-13 05:14:09.181 UTC [chaincodeCmd] install -> INFO 003 Installed remotely response:<status:200 payload:"OK" > 
+
+```
+
+peer1.org1에 설치
+```sh
+docker exec \
+  -e CORE_PEER_LOCALMSPID=Org1MSP \
+  -e CORE_PEER_ADDRESS=peer1.org1.example.com:8051 \
+  -e CORE_PEER_MSPCONFIGPATH=${ORG1_MSPCONFIGPATH} \
+  -e CORE_PEER_TLS_ROOTCERT_FILE=${ORG1_TLS_ROOTCERT_FILE} \
+  cli \
+  peer chaincode install \
+    -n bloodchain \
+    -v 1.0 \
+    -p "/opt/gopath/src/github.com/chaincode/javascript" \
+    -l "node"
+2019-11-13 05:16:06.780 UTC [chaincodeCmd] checkChaincodeCmdParams -> INFO 001 Using default escc
+2019-11-13 05:16:06.780 UTC [chaincodeCmd] checkChaincodeCmdParams -> INFO 002 Using default vscc
+2019-11-13 05:16:06.846 UTC [chaincodeCmd] install -> INFO 003 Installed remotely response:<status:200 payload:"OK" > 
+
+``` 
+
+peer0.org2에 설치
+```sh
+docker exec \
+  -e CORE_PEER_LOCALMSPID=Org2MSP \
+  -e CORE_PEER_ADDRESS=peer0.org2.example.com:9051 \
+  -e CORE_PEER_MSPCONFIGPATH=${ORG2_MSPCONFIGPATH} \
+  -e CORE_PEER_TLS_ROOTCERT_FILE=${ORG2_TLS_ROOTCERT_FILE} \
+  cli \
+  peer chaincode install \
+    -n bloodchain \
+    -v 1.0 \
+    -p "/opt/gopath/src/github.com/chaincode/javascript" \
+    -l "node"
+2019-11-13 05:16:06.780 UTC [chaincodeCmd] checkChaincodeCmdParams -> INFO 001 Using default escc
+2019-11-13 05:16:06.780 UTC [chaincodeCmd] checkChaincodeCmdParams -> INFO 002 Using default vscc
+2019-11-13 05:16:06.846 UTC [chaincodeCmd] install -> INFO 003 Installed remotely response:<status:200 payload:"OK" > 
+```
+
+peer1.org2에 설치
+```sh
+docker exec \
+  -e CORE_PEER_LOCALMSPID=Org2MSP \
+  -e CORE_PEER_ADDRESS=peer1.org2.example.com:10051 \
+  -e CORE_PEER_MSPCONFIGPATH=${ORG2_MSPCONFIGPATH} \
+  -e CORE_PEER_TLS_ROOTCERT_FILE=${ORG2_TLS_ROOTCERT_FILE} \
+  cli \
+  peer chaincode install \
+    -n bloodchain \
+    -v 1.0 \
+    -p "/opt/gopath/src/github.com/chaincode/javascript" \
+    -l "node"
+2019-11-13 05:16:06.780 UTC [chaincodeCmd] checkChaincodeCmdParams -> INFO 001 Using default escc
+2019-11-13 05:16:06.780 UTC [chaincodeCmd] checkChaincodeCmdParams -> INFO 002 Using default vscc
+2019-11-13 05:16:06.846 UTC [chaincodeCmd] install -> INFO 003 Installed remotely response:<status:200 payload:"OK" > 
+
+```
+install 후 앵커피어인 peer0.org1.example.com에 instantiate를 한다. -C 엔 채널이름, -n은 체인코드 이름이 들어간다.
+
+```sh
+docker exec \
+  -e CORE_PEER_LOCALMSPID=Org1MSP \
+  -e CORE_PEER_MSPCONFIGPATH=${ORG1_MSPCONFIGPATH} \
+  cli \
+  peer chaincode instantiate \
+    -o orderer.example.com:7050 \
+    -C bloodchannel \
+    -n bloodchain \
+    -l "node" \
+    -v 1.0 \
+    -c '{"Args":[]}' \
+    -P "AND('Org1MSP.member','Org2MSP.member')" \
+    --tls \
+    --cafile ${ORDERER_TLS_ROOTCERT_FILE} \
+    --peerAddresses peer0.org1.example.com:7051 \
+    --tlsRootCertFiles ${ORG1_TLS_ROOTCERT_FILE}
+2019-11-13 06:31:57.134 UTC [chaincodeCmd] checkChaincodeCmdParams -> INFO 001 Using default escc
+2019-11-13 06:31:57.134 UTC [chaincodeCmd] checkChaincodeCmdParams -> INFO 002 Using default vscc
+
+```
+
+모든 peer에 대해 다음 요청될 트랜잭션을 위해 initLedger로 초기화 트랜잭션을 요청한다. (시간 다소 소요)
+```sh
+docker exec \
+  -e CORE_PEER_LOCALMSPID=Org1MSP \
+  -e CORE_PEER_MSPCONFIGPATH=${ORG1_MSPCONFIGPATH} \
+  cli \
+  peer chaincode invoke \
+    -o orderer.example.com:7050 \
+    -C bloodchannel \
+    -n bloodchain \
+    -c '{"function":"initLedger","Args":[]}' \
+    --waitForEvent \
+    --tls \
+    --cafile ${ORDERER_TLS_ROOTCERT_FILE} \
+    --peerAddresses peer0.org1.example.com:7051 \
+    --peerAddresses peer1.org1.example.com:8051 \
+    --peerAddresses peer0.org2.example.com:9051 \
+    --peerAddresses peer1.org2.example.com:10051 \
+    --tlsRootCertFiles ${ORG1_TLS_ROOTCERT_FILE} \
+    --tlsRootCertFiles ${ORG1_TLS_ROOTCERT_FILE} \
+    --tlsRootCertFiles ${ORG2_TLS_ROOTCERT_FILE} \
+    --tlsRootCertFiles ${ORG2_TLS_ROOTCERT_FILE}
+2019-11-13 06:41:05.280 UTC [chaincodeCmd] ClientWait -> INFO 001 txid [405dfd0e3c2c04061e50faef6bc1bf2963cfe62fb1d3b9c58ec1f17fa11bc4df] committed with status (VALID) at peer0.org2.example.com:9051
+2019-11-13 06:41:05.387 UTC [chaincodeCmd] ClientWait -> INFO 002 txid [405dfd0e3c2c04061e50faef6bc1bf2963cfe62fb1d3b9c58ec1f17fa11bc4df] committed with status (VALID) at peer1.org2.example.com:10051
+2019-11-13 06:41:05.412 UTC [chaincodeCmd] ClientWait -> INFO 003 txid [405dfd0e3c2c04061e50faef6bc1bf2963cfe62fb1d3b9c58ec1f17fa11bc4df] committed with status (VALID) at peer0.org1.example.com:7051
+2019-11-13 06:41:05.426 UTC [chaincodeCmd] ClientWait -> INFO 004 txid [405dfd0e3c2c04061e50faef6bc1bf2963cfe62fb1d3b9c58ec1f17fa11bc4df] committed with status (VALID) at peer1.org1.example.com:8051
+2019-11-13 06:41:05.427 UTC [chaincodeCmd] chaincodeInvokeOrQuery -> INFO 005 Chaincode invoke successful. result: status:200 
+
+```
