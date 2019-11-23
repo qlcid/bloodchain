@@ -13,50 +13,6 @@ var bloodnetwork_path = path.resolve('..', 'fabric', 'blood-network');
 var org1tlscacert_path = path.resolve(bloodnetwork_path, 'crypto-config', 'peerOrganizations', 'org1.example.com', 'tlsca', 'tlsca.org1.example.com-cert.pem');
 var org1tlscacert = fs.readFileSync(org1tlscacert_path, 'utf8');
 
-// node invoke.js [호출할 함수 이름] [함수의 매개변수...]  
-// ex)
-// node invoke.js register 1(일련번호) wocjf8888(등록자 아이디)              
-// node invoke.js donate 2(기부할 헌혈증 개수) wocjf8888(기부자 아이디) jaecheol1234(기부 요청자 아이디, owner가 이걸로 바뀜) 명지병원(사용될 병원)
-// node invoke.js use jaecheol1234(헌혈증 사용할 기부요청자의 아이디)
-
-// const process = require('process');
-// var args = process.argv;
-// var func = args[2]; // 무슨 함수 호출할건지 가져옴.  등록(register) 인지 기부(donate) 인지 등등
-
-// switch (func) {
-// 	case 'register':
-// 		if (args.length != 5) {
-// 			console.log('인자 개수 error! 다시입력 ㄱㄱ');
-// 			break;
-// 		}
-// 		invoke('register', [args[3], args[4]]);
-// 		break;
-// 	case 'getSerials':
-// 		if (args.length != 5) {
-// 			console.log('인자 개수 error! 다시입력 ㄱㄱ');
-// 			break;
-// 		}
-// 		invoke('getDonatedSerials', [args[3], args[4]]);
-// 		break;
-// 	case 'donate':
-// 		if (args.length != 6) {
-// 			console.log('인자 개수 error! 다시입력 ㄱㄱ');
-// 			break;
-// 		}
-// 		invoke('donate', [args[3], args[4], args[5]]);
-// 		break;
-
-// 	case 'use':
-// 		if (args.length != 4) {
-// 			console.log('인자 개수 error! 다시입력 ㄱㄱ');
-// 			break;
-// 		}
-// 		invoke('use', [args[3]]);
-// 		break;
-// 	default:
-// 		break;
-// }
-
 async function invoke(func, params) {
 	console.log('\n\n --- invoke.js - start');
 	try {
