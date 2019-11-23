@@ -127,16 +127,7 @@ async function invoke(func, params) {
 					txId: tx_id
 				};
 				break;
-			// case 'getDonatedSerials':
-			// 	proposal_request = {
-			// 		targets: [peer],
-			// 		chaincodeId: 'bloodchain',
-			// 		fcn: 'getDonatedSerials',
-			// 		args: [params[0], params[1]],
-			// 		chainId: 'bloodchannel',
-			// 		txId: tx_id
-			// 	};
-			// 	break;
+
 			case 'donate':
 				proposal_request = {
 					targets: [peer],
@@ -147,6 +138,7 @@ async function invoke(func, params) {
 					txId: tx_id
 				};
 				break;
+				
 			case 'use':
 			proposal_request = {
 				targets: [peer],

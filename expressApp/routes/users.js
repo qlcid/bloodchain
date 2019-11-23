@@ -185,7 +185,7 @@ router.post('/register_do', function (req, res, next) {
         });
       }
     });
-  }).then(async function () { // node.js 비동기 처리 위해 위처럼 따로 User.create 안하고 then 씀.
+  }).then(async function () {
     // duplicated == false일 때(중복 아닐때) db에 저장
     if (duplicated == false) {
       User.create({
@@ -214,18 +214,17 @@ router.post('/register_do', function (req, res, next) {
         limit: 5
       })
 
-      res.render('main', ranks, {companys: companys, persons: persons}, {
+      var result = {companys: companys, persons: persons};
+
+      res.render('main', Object.assign(result, {
         register:"success", 
         logged: false,
         login: false
-      });
+      }));
     }
   }).catch(function (err) {
     console.log(err);
   });
-
-
-
 });
 
 module.exports = router;

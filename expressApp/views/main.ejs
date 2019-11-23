@@ -81,15 +81,15 @@
           </ul>
 
           <!-- The slideshow -->
-          <div class="carousel-inner">
+          <div class="carousel-inner text-center">
             <div class="carousel-item active">
-              <img src="/images/green.jpg" width="1280" height="450">
+              <img src="/images/green.jpg" width="1800" height="450">
             </div>
             <div class="carousel-item">
-              <img src="/images/smile.jpg" width="1280" height="450">
+              <img src="/images/smile.jpg" width="1800" height="450">
             </div>
             <div class="carousel-item">
-              <img src="/images/heart.jpg" width="1280" height="450">
+              <img src="/images/heart.jpg" width="1800" height="450">
             </div>
           </div>
 
@@ -134,13 +134,12 @@
                 </div>
             </div>
             <hr>
-            <%if(locals.bdcard_count){%>
+            <%if(locals.dona_count){%>
                 <div class="row">
                     <div class="col-md-4">
                         <p></p>총 <a style="color: green"><%=locals.bdcard_count + locals.dona_count%></a>개의 헌혈증을 등록하셨습니다.</p>
                     </div>
                 </div>
-            <%if(locals.dona_count){%>
                 <div class="row">
                     <div class="col-md-3">
                         <p>그 중  <a style="color: red"><%=locals.dona_count%></a>개를 기부해</p>
@@ -159,10 +158,10 @@
                             <a id="only_reg" class="btn btn-primary" href="/blood/onlyReg_blood_list"> 아직 기부하지 않은 헌혈증 목록 확인 &raquo;</a>
                     </div>
                 </div>
-            <%}}else{%>
+            <%}else{%>
                 <div class="row">
                      <div class="col-md-6">
-                        <p>헌혈증 등록내역이 존재하지 않습니다.</p>
+                        <p>헌혈증 기부내역이 존재하지 않습니다.</p>
                     </div>
                 </div>
             <%}%>

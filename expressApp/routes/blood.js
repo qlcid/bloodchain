@@ -300,34 +300,6 @@ router.post('/blood_use', async function (req, res, next) {
   res.send(req.user);
 });
 
-// async function assignObject(bcBloods){
-//   var resultHash = new Array();
-
-//   await bcBloods.forEach(async (bcBlood) => {
-//     var dbBlood = await Bdcard.findOne({
-//       where: {serial_number: bcBlood.Key},
-//       include: [
-//         {model: Reqboard, required: true},
-//       ]
-//     })
-//     if(!resultHash[dbBlood.req_id]){
-//       //console.log('zzzz ---------->' + JSON.stringify(resultHash));
-//       resultHash[dbBlood.req_id] = [dbBlood];
-        
-//         // is_donated: dbBlood.reqboard.is_finished,
-//         // is_all_used: dbBlood.reqboard.is_all_used,
-//         // used_place: dbBlood.reqboard.used_place
-      
-//     }else{
-//       resultHash[dbBlood.req_id].push(dbBlood);
-//     }
-//   });
-
-//   return new Promise(function(resolve, reject){
-//     resolve(resultHash);
-//   });
-// }
-
 // 기부요청글별로 기부내역 보기
 router.get('/blood_history_req', async function (req, res, next) {
   var req_id = null;
@@ -407,7 +379,6 @@ router.get('/blood_history_dona', async function (req, res, next){
 router.get('/blood_history_dona_all', async function (req, res, next){
   var user = req.user.user_id;
   var bcBloods = await querySDK.query('dona', user);
-
   var data = [];
 
   for(bcBlood of bcBloods){

@@ -8,46 +8,6 @@ class BloodChain extends Contract {
     async initLedger(ctx) {
         console.info('============= START : Initialize Ledger ===========');
 
-        // 초기화 데이터
-        // const bloodCards = [
-        //     {
-        //         owner: 'wocjf8888',
-        //         reg_date: new Date().toLocaleDateString(),
-        //         is_donated: false,
-        //         donater: null,
-        //         dona_date: null,
-        //         is_used: false,
-        //         used_place: null,
-        //         used_date: null
-        //     },
-        //     {
-        //         owner: 'jaecheol1234',
-        //         reg_date: new Date().toLocaleDateString(),
-        //         is_donated: false,
-        //         donater: null,
-        //         dona_date: null,
-        //         is_used: false,
-        //         used_place: null,
-        //         used_date: null
-        //     },
-        //     {
-        //         owner: 'ys97',
-        //         reg_date: new Date().toLocaleDateString(),
-        //         is_donated: true,
-        //         donater: null,
-        //         dona_date: null,
-        //         is_used: false,
-        //         used_place: null,
-        //         used_date: null
-        //     },
-        // ];
-
-        // for (let i = 0; i < bloodCards.length; i++) {
-        //     bloodCards[i].docType = 'bloodCard';
-        //     await ctx.stub.putState('BLOODCARD' + i, Buffer.from(JSON.stringify(bloodCards[i])));
-        //     console.info('Added <--> ', bloodCards[i]);
-        // }
-
         const bloodCards = [
             {
                 owner: '1',
@@ -62,10 +22,8 @@ class BloodChain extends Contract {
             }
         ];
 
-        for (let i = 0; i < 20; i++) {
-            await ctx.stub.putState((i + 1).toString(), Buffer.from(JSON.stringify(bloodCards[0])));
-            console.info('Added <--> ', bloodCards[0]);
-        }
+        await ctx.stub.putState('test', Buffer.from(JSON.stringify(bloodCards[0])));
+        console.info('Added <--> ', bloodCards[0]);
 
         console.info('============= END : Initialize Ledger ===========');
     }
@@ -142,7 +100,7 @@ class BloodChain extends Contract {
         return this.getResults(iterator);
     }
 
-    // 헌혈증 등록(구현 완료) return : x
+    // 헌혈증 등록 return : x
     async register(ctx, serialNumber, owner) {
         console.info('============= START : Create bloodCard ===========');
         const bloodCard = {
@@ -198,7 +156,7 @@ class BloodChain extends Contract {
         }
     }
 
-    // getDonatedSerial 로 가져온 serial들 중 serial 하나에 해당하는 헌혈증을 기부처리 한다.
+    // getDonatedSerial 로 가져온 serial들 중 serial 하나에 해당하는 헌혈증을 기부처리
     async donate(ctx, serial, newOwner, used_place){
         var value = await ctx.stub.getState(serial);
         var bloodCard = JSON.parse(value.toString('utf8'));
@@ -210,7 +168,7 @@ class BloodChain extends Contract {
         await ctx.stub.putState(serial, Buffer.from(JSON.stringify(bloodCard)));
     }
 
-    // 헌혈증 사용(구현 완료) return : x
+    // 헌혈증 사용 return : x
     async useCard(ctx, serial){
         var value = await ctx.stub.getState(serial);
         if (!value || value.length === 0) {
@@ -219,18 +177,7 @@ class BloodChain extends Contract {
         var bloodCard = JSON.parse(value.toString('utf8'));
         bloodCard.is_used = true;
         bloodCard.used_date = new Date().toLocaleDateString();
-        await ctx.stub.putState(serial, Buffer.from(JSON.stringify(bloodCard)));
-        // const iterator = await ctx.stub.getQueryResult(`{ \"selector\": {\"docType\": \"bloodCard\", \"owner\": \"${donateRequester}\"} }`);
-        // while (true) {
-        //     const res = await iterator.next();
-
-        //     var bloodCard = JSON.parse(res.value.value.toString('utf8'));
-        //     bloodCard.is_used = true;
-        //     bloodCard.used_date = new Date().toLocaleDateString();
-        //     await ctx.stub.putState(res.value.key, Buffer.from(JSON.stringify(bloodCard)));
-        //     if(res.done)
-        //         return;
-        // }
+        await ctx.stub.putState(serial, Buffer.from(JSON.stringify(bloodCard)))
     }
 
 }
